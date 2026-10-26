@@ -1,0 +1,504 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>Intuint Leadership Survey</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: one calm column, one part per screen, brand dark throughout (deliberately single-theme). */
+:root {
+  --bg: #18171C; --panel: #211F26; --line: #34313B; --ink: #ECEAF0; --ink-2: #B9B5C1; --muted: #8E8A97;
+  --rose: #D4578F; --rose-ink: #18171C; --gut: #C27F1E; --intel: #5389CF; --bad: #F0796B;
+  --f-display: "IBM Plex Sans Condensed", "Arial Narrow", Arial, sans-serif;
+  --f-body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { background: var(--bg); color: var(--ink); }
+body { font: 400 16px/1.55 var(--f-body); }
+.wrap { max-width: 760px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 64px; }
+header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 28px; }
+.mark { font: 700 26px/1 var(--f-display); letter-spacing: -0.3px; }
+.mark i { font-style: normal; color: var(--rose); }
+.step-count { font: 500 13px var(--f-mono); color: var(--muted); }
+.bar { height: 3px; background: var(--line); border-radius: 2px; margin-bottom: 36px; overflow: hidden; }
+.bar span { display: block; height: 100%; width: 0; background: var(--rose); transition: width .3s ease; }
+
+h1 { font: 600 clamp(32px, 5.6vw, 50px)/1.06 var(--f-display); margin: 0 0 18px; letter-spacing: -0.5px; text-wrap: balance; }
+h2 { font: 600 30px/1.15 var(--f-display); margin: 0 0 8px; text-wrap: balance; }
+.lede { color: var(--ink-2); font-size: 18px; max-width: 62ch; margin: 0 0 22px; }
+.eyebrow { font: 600 12px/1 var(--f-display); text-transform: uppercase; letter-spacing: .12em; color: var(--rose); margin-bottom: 14px; }
+.pillars { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 26px 0 28px; }
+.pillars div { background: var(--panel); border-radius: 8px; padding: 16px; border-top: 3px solid var(--line); }
+.pillars div:nth-child(1) { border-top-color: var(--gut); }
+.pillars div:nth-child(2) { border-top-color: var(--intel); }
+.pillars div:nth-child(3) { border-top-color: var(--rose); }
+.pillars b { display: block; font: 600 18px var(--f-display); margin-bottom: 4px; }
+.pillars span { color: var(--ink-2); font-size: 14px; }
+.facts { display: flex; flex-wrap: wrap; gap: 8px 24px; color: var(--muted); font: 500 14px var(--f-mono); margin-bottom: 8px; }
+@media (max-width: 600px) { .pillars { grid-template-columns: minmax(0, 1fr); } }
+
+.q { padding: 22px 0; border-top: 1px solid var(--line); }
+.q:first-of-type { border-top: 0; }
+.q > p.qt { margin: 0 0 4px; font-weight: 600; font-size: 17px; }
+.q > p.hint { margin: 0 0 12px; color: var(--muted); font-size: 14px; }
+.q > p.qt + .opts, .q > p.qt + textarea { margin-top: 12px; }
+.opts { display: flex; flex-wrap: wrap; gap: 8px; }
+.opt { position: relative; }
+.opt input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.opt span { display: inline-block; padding: 9px 14px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); color: var(--ink); font-size: 15px; cursor: pointer; transition: border-color .15s, background .15s; }
+.opt input:checked + span { border-color: var(--rose); background: rgba(212, 87, 143, .16); }
+.opt input[type=checkbox]:checked + span::before { content: "✓ "; color: var(--rose); }
+.opt input:focus-visible + span { outline: 2px solid var(--rose); outline-offset: 2px; }
+.opt span:hover { border-color: var(--muted); }
+textarea, input[type=text], input[type=email] { width: 100%; font: inherit; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; }
+textarea:focus-visible, input:focus-visible, button:focus-visible { outline: 2px solid var(--rose); outline-offset: 2px; }
+label.check { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; color: var(--ink-2); margin-top: 12px; }
+label.check input { margin-top: 4px; accent-color: var(--rose); }
+.q.missing > p.qt { color: var(--bad); }
+
+.nav { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 32px; }
+button { font: 600 15px var(--f-body); border-radius: 6px; padding: 12px 20px; cursor: pointer; }
+.primary { background: var(--rose); color: var(--rose-ink); border: 0; }
+.ghost { background: transparent; color: var(--ink-2); border: 1px solid var(--line); }
+.err { color: var(--bad); font-size: 14px; min-height: 20px; }
+.privacy { color: var(--muted); font-size: 13px; margin-top: 24px; max-width: 64ch; }
+
+.profile { display: grid; gap: 18px; margin: 24px 0 8px; }
+.prow { display: grid; grid-template-columns: 170px minmax(0, 1fr) 56px; gap: 14px; align-items: center; }
+.prow .pn { font: 600 16px var(--f-display); }
+.prow .pn small { display: block; font: 400 13px var(--f-body); color: var(--muted); }
+.ptrack { height: 12px; background: var(--panel); border-radius: 6px; overflow: hidden; }
+.ptrack span { display: block; height: 100%; border-radius: 6px; }
+.pv { font: 500 18px var(--f-mono); text-align: right; }
+.pnote { grid-column: 1 / -1; color: var(--ink-2); font-size: 14px; margin: -6px 0 0; }
+@media (max-width: 560px) { .prow { grid-template-columns: minmax(0, 1fr) 52px; } .ptrack { grid-column: 1 / -1; order: 3; } }
+.overall { display: flex; align-items: baseline; gap: 12px; margin-top: 8px; }
+.overall b { font: 500 44px/1 var(--f-mono); }
+.overall span { color: var(--muted); }
+.notice { background: var(--panel); border-left: 3px solid var(--rose); padding: 12px 14px; border-radius: 4px; font-size: 14px; color: var(--ink-2); margin-top: 16px; }
+pre.copy { white-space: pre-wrap; word-break: break-word; background: var(--panel); padding: 12px; border-radius: 6px; font: 12px/1.5 var(--f-mono); color: var(--ink-2); max-height: 220px; overflow: auto; }
+@media (prefers-reduced-motion: no-preference) { [data-step]:not([hidden]) { animation: in .25s ease both; } @keyframes in { from { opacity: .3; transform: translateY(6px); } to { opacity: 1; transform: none; } } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="mark" aria-label="intuint">intu<i>i</i>nt</div>
+    <div class="step-count" id="count" aria-live="polite"></div>
+  </header>
+  <div class="bar" aria-hidden="true"><span id="bar"></span></div>
+
+  <form id="form" novalidate>
+
+  <section data-step="0">
+    <div class="eyebrow">Leadership survey</div>
+    <h1>Do you know where your judgement has earned trust?</h1>
+    <p class="lede">Intuint helps leadership teams record gut and analysis as separate forecasts, score both against what actually happens, and flag the biases that cost money. This survey asks how your organisation does that today, if at all.</p>
+    <div class="pillars">
+      <div><b>Gut vs analysis</b><span>Are the two kept apart, or blended into one recommendation?</span></div>
+      <div><b>Bias checks</b><span>Is anything in place to catch bias before approval?</span></div>
+      <div><b>Feedback</b><span>Are forecasts ever compared with outcomes?</span></div>
+    </div>
+    <div class="facts"><span>6 minutes</span><span>5 short parts</span><span>Anonymous unless you choose otherwise</span></div>
+    <p class="privacy">At the end you'll see your organisation's decision-discipline profile. Answers are used only to research how South African leaders make major decisions, and results are reported in aggregate with no organisation or person named.</p>
+  </section>
+
+  <section data-step="1" hidden>
+    <div class="eyebrow">Part 1 of 5 · Gut and analysis</div>
+    <h2>How intuition and analysis meet</h2>
+    <div class="q"><p class="qt">When a major decision is put forward, is the decision-maker's intuitive view recorded separately from the analytical case?</p>
+      <div class="opts" data-name="gut_recorded" data-required>
+        <label class="opt"><input type="radio" name="gut_recorded" value="no"><span>No</span></label>
+        <label class="opt"><input type="radio" name="gut_recorded" value="informal"><span>Discussed, not recorded</span></label>
+        <label class="opt"><input type="radio" name="gut_recorded" value="written"><span>Yes, written down</span></label>
+      </div></div>
+    <div class="q"><p class="qt">When gut and analysis disagree on a major decision, what usually decides it?</p>
+      <div class="opts" data-name="conflict" data-required>
+        <label class="opt"><input type="radio" name="conflict" value="gut"><span>The senior person's instinct</span></label>
+        <label class="opt"><input type="radio" name="conflict" value="analysis"><span>The numbers</span></label>
+        <label class="opt"><input type="radio" name="conflict" value="who"><span>Whoever argues hardest</span></label>
+        <label class="opt"><input type="radio" name="conflict" value="process"><span>A defined process</span></label>
+      </div></div>
+    <div class="q"><p class="qt">Does your organisation use any named method or framework for weighing intuition against analysis?</p>
+      <div class="opts" data-name="framework" data-required>
+        <label class="opt"><input type="radio" name="framework" value="none"><span>None</span></label>
+        <label class="opt"><input type="radio" name="framework" value="informal"><span>Informal rules of thumb</span></label>
+        <label class="opt"><input type="radio" name="framework" value="formal"><span>Yes, a formal method</span></label>
+      </div>
+      <p class="hint" style="margin-top:12px">If yes, which one? (optional)</p>
+      <input type="text" id="framework_name" name="framework_name" maxlength="200" aria-label="Name of the framework"></div>
+    <div class="q"><p class="qt">How are major proposals usually expressed?</p>
+      <div class="opts" data-name="probabilities" data-required>
+        <label class="opt"><input type="radio" name="probabilities" value="recommendation"><span>As a recommendation (“we should”)</span></label>
+        <label class="opt"><input type="radio" name="probabilities" value="sometimes"><span>Sometimes with a likelihood</span></label>
+        <label class="opt"><input type="radio" name="probabilities" value="probability"><span>With explicit probabilities (“70% likely”)</span></label>
+      </div></div>
+  </section>
+
+  <section data-step="2" hidden>
+    <div class="eyebrow">Part 2 of 5 · Bias checks</div>
+    <h2>Catching bias before approval</h2>
+    <div class="q"><p class="qt">Which of these do you use before major approvals?</p>
+      <p class="hint">Select all that apply.</p>
+      <div class="opts" data-name="bias_methods" data-required data-multi>
+        <label class="opt"><input type="checkbox" name="bias_methods" value="premortem"><span>Pre-mortem</span></label>
+        <label class="opt"><input type="checkbox" name="bias_methods" value="red_team"><span>Red team or devil's advocate</span></label>
+        <label class="opt"><input type="checkbox" name="bias_methods" value="independent_review"><span>Independent review</span></label>
+        <label class="opt"><input type="checkbox" name="bias_methods" value="base_rates"><span>Base rates from similar past decisions</span></label>
+        <label class="opt"><input type="checkbox" name="bias_methods" value="checklist"><span>Decision checklist</span></label>
+        <label class="opt"><input type="checkbox" name="bias_methods" value="none" data-exclusive><span>None of these</span></label>
+      </div></div>
+    <div class="q"><p class="qt">How consistently are those checks applied?</p>
+      <div class="opts" data-name="bias_frequency" data-required>
+        <label class="opt"><input type="radio" name="bias_frequency" value="never"><span>Never or not applicable</span></label>
+        <label class="opt"><input type="radio" name="bias_frequency" value="some"><span>On some big decisions</span></label>
+        <label class="opt"><input type="radio" name="bias_frequency" value="always"><span>On every decision above a threshold</span></label>
+      </div></div>
+    <div class="q"><p class="qt">Which biases cost your organisation most?</p>
+      <p class="hint">Pick up to three.</p>
+      <div class="opts" data-name="costly_biases" data-required data-multi data-max="3">
+        <label class="opt"><input type="checkbox" name="costly_biases" value="overconfidence"><span>Overconfidence</span></label>
+        <label class="opt"><input type="checkbox" name="costly_biases" value="anchoring"><span>Anchoring on quoted figures</span></label>
+        <label class="opt"><input type="checkbox" name="costly_biases" value="sunk_cost"><span>Sunk cost</span></label>
+        <label class="opt"><input type="checkbox" name="costly_biases" value="confirmation"><span>Confirmation</span></label>
+        <label class="opt"><input type="checkbox" name="costly_biases" value="status_quo"><span>Status quo</span></label>
+        <label class="opt"><input type="checkbox" name="costly_biases" value="recency"><span>Recent events</span></label>
+        <label class="opt"><input type="checkbox" name="costly_biases" value="groupthink"><span>Groupthink</span></label>
+      </div></div>
+    <div class="q"><p class="qt">Has your leadership team had bias or decision-making training? Did it change how decisions are made?</p>
+      <div class="opts" data-name="training" data-required>
+        <label class="opt"><input type="radio" name="training" value="none"><span>No training</span></label>
+        <label class="opt"><input type="radio" name="training" value="no_change"><span>Yes, little changed</span></label>
+        <label class="opt"><input type="radio" name="training" value="changed"><span>Yes, it changed practice</span></label>
+      </div></div>
+  </section>
+
+  <section data-step="3" hidden>
+    <div class="eyebrow">Part 3 of 5 · Feedback</div>
+    <h2>Learning from outcomes</h2>
+    <div class="q"><p class="qt">After a major decision plays out, is the original expectation compared with the result?</p>
+      <div class="opts" data-name="post_review" data-required>
+        <label class="opt"><input type="radio" name="post_review" value="rarely"><span>Rarely or never</span></label>
+        <label class="opt"><input type="radio" name="post_review" value="sometimes"><span>Sometimes</span></label>
+        <label class="opt"><input type="radio" name="post_review" value="always"><span>Always, formally</span></label>
+      </div></div>
+    <div class="q"><p class="qt">Do you know whose judgement on your team is most reliable, and in which areas?</p>
+      <div class="opts" data-name="know_reliable" data-required>
+        <label class="opt"><input type="radio" name="know_reliable" value="no"><span>No</span></label>
+        <label class="opt"><input type="radio" name="know_reliable" value="feeling"><span>I have a feeling</span></label>
+        <label class="opt"><input type="radio" name="know_reliable" value="records"><span>Yes, from records</span></label>
+      </div></div>
+    <div class="q"><p class="qt">Have you tried a decision log or formal lessons-learned process?</p>
+      <div class="opts" data-name="decision_log" data-required>
+        <label class="opt"><input type="radio" name="decision_log" value="never"><span>Never</span></label>
+        <label class="opt"><input type="radio" name="decision_log" value="abandoned"><span>Tried, then dropped</span></label>
+        <label class="opt"><input type="radio" name="decision_log" value="in_use"><span>Yes, still in use</span></label>
+      </div>
+      <p class="hint" style="margin-top:12px">If it was dropped, why? (optional)</p>
+      <input type="text" id="log_dropped_why" name="log_dropped_why" maxlength="300" aria-label="Why the decision log was dropped"></div>
+    <div class="q"><p class="qt">If a system privately showed you where your instinct had a better record than your analysis, would you want to see it?</p>
+      <div class="opts" data-name="want_private" data-required>
+        <label class="opt"><input type="radio" name="want_private" value="yes"><span>Yes</span></label>
+        <label class="opt"><input type="radio" name="want_private" value="maybe"><span>Maybe</span></label>
+        <label class="opt"><input type="radio" name="want_private" value="no"><span>No</span></label>
+      </div></div>
+    <div class="q"><p class="qt">Would you be comfortable if your board saw the same record?</p>
+      <div class="opts" data-name="board_visible" data-required>
+        <label class="opt"><input type="radio" name="board_visible" value="yes"><span>Yes</span></label>
+        <label class="opt"><input type="radio" name="board_visible" value="aggregate_only"><span>Only as team totals</span></label>
+        <label class="opt"><input type="radio" name="board_visible" value="no"><span>No</span></label>
+      </div></div>
+  </section>
+
+  <section data-step="4" hidden>
+    <div class="eyebrow">Part 4 of 5 · Experience</div>
+    <h2>Where experience counts</h2>
+    <div class="q"><p class="qt">How many years have you been making senior decisions in your industry?</p>
+      <div class="opts" data-name="years" data-required>
+        <label class="opt"><input type="radio" name="years" value="under10"><span>Under 10</span></label>
+        <label class="opt"><input type="radio" name="years" value="10-20"><span>10–20</span></label>
+        <label class="opt"><input type="radio" name="years" value="20-30"><span>20–30</span></label>
+        <label class="opt"><input type="radio" name="years" value="30plus"><span>Over 30</span></label>
+      </div></div>
+    <div class="q"><p class="qt">“Experience in a field makes a leader's judgement in that field more reliable.”</p>
+      <div class="opts" data-name="experience_belief" data-required>
+        <label class="opt"><input type="radio" name="experience_belief" value="1"><span>Strongly disagree</span></label>
+        <label class="opt"><input type="radio" name="experience_belief" value="2"><span>Disagree</span></label>
+        <label class="opt"><input type="radio" name="experience_belief" value="3"><span>Neutral</span></label>
+        <label class="opt"><input type="radio" name="experience_belief" value="4"><span>Agree</span></label>
+        <label class="opt"><input type="radio" name="experience_belief" value="5"><span>Strongly agree</span></label>
+      </div></div>
+    <div class="q"><p class="qt">Where do you trust your instinct most, and where does experience count for least?</p>
+      <p class="hint">Most</p>
+      <div class="opts" data-name="trust_most" data-required>
+        <label class="opt"><input type="radio" name="trust_most" value="people"><span>People</span></label>
+        <label class="opt"><input type="radio" name="trust_most" value="operations"><span>Operations and equipment</span></label>
+        <label class="opt"><input type="radio" name="trust_most" value="deals"><span>Deals and pricing</span></label>
+        <label class="opt"><input type="radio" name="trust_most" value="capital"><span>Capital projects</span></label>
+        <label class="opt"><input type="radio" name="trust_most" value="markets"><span>Markets</span></label>
+      </div>
+      <p class="hint" style="margin-top:14px">Least</p>
+      <div class="opts" data-name="trust_least" data-required>
+        <label class="opt"><input type="radio" name="trust_least" value="people"><span>People</span></label>
+        <label class="opt"><input type="radio" name="trust_least" value="operations"><span>Operations and equipment</span></label>
+        <label class="opt"><input type="radio" name="trust_least" value="deals"><span>Deals and pricing</span></label>
+        <label class="opt"><input type="radio" name="trust_least" value="capital"><span>Capital projects</span></label>
+        <label class="opt"><input type="radio" name="trust_least" value="markets"><span>Markets</span></label>
+      </div></div>
+    <div class="q"><p class="qt">Optional: describe a time your experience misled you. What was different about that situation?</p>
+      <textarea id="misled" name="misled" rows="3" maxlength="1200" aria-label="A time experience misled you"></textarea></div>
+  </section>
+
+  <section data-step="5" hidden>
+    <div class="eyebrow">Part 5 of 5 · About you</div>
+    <h2>Last few details</h2>
+    <div class="q"><p class="qt">Your role</p>
+      <div class="opts" data-name="role" data-required>
+        <label class="opt"><input type="radio" name="role" value="chair"><span>Chair or director</span></label>
+        <label class="opt"><input type="radio" name="role" value="ceo"><span>CEO or MD</span></label>
+        <label class="opt"><input type="radio" name="role" value="cfo"><span>CFO</span></label>
+        <label class="opt"><input type="radio" name="role" value="coo"><span>COO or GM</span></label>
+        <label class="opt"><input type="radio" name="role" value="risk"><span>Risk or audit</span></label>
+        <label class="opt"><input type="radio" name="role" value="other"><span>Other executive</span></label>
+      </div></div>
+    <div class="q"><p class="qt">Your sector</p>
+      <div class="opts" data-name="sector" data-required>
+        <label class="opt"><input type="radio" name="sector" value="mining"><span>Mining and resources</span></label>
+        <label class="opt"><input type="radio" name="sector" value="energy"><span>Energy</span></label>
+        <label class="opt"><input type="radio" name="sector" value="financial"><span>Financial services</span></label>
+        <label class="opt"><input type="radio" name="sector" value="industrial"><span>Industrial</span></label>
+        <label class="opt"><input type="radio" name="sector" value="other"><span>Other</span></label>
+      </div></div>
+    <div class="q"><p class="qt">Roughly how many major decisions (capital, contracts, strategic) did you approve or shape in the last 12 months?</p>
+      <div class="opts" data-name="decisions_per_year" data-required>
+        <label class="opt"><input type="radio" name="decisions_per_year" value="under10"><span>Fewer than 10</span></label>
+        <label class="opt"><input type="radio" name="decisions_per_year" value="10-25"><span>10–25</span></label>
+        <label class="opt"><input type="radio" name="decisions_per_year" value="25-50"><span>25–50</span></label>
+        <label class="opt"><input type="radio" name="decisions_per_year" value="50plus"><span>More than 50</span></label>
+      </div></div>
+    <div class="q"><p class="qt">If a tool like Intuint were adopted, which budget would pay for it?</p>
+      <div class="opts" data-name="budget" data-required>
+        <label class="opt"><input type="radio" name="budget" value="finance"><span>Finance</span></label>
+        <label class="opt"><input type="radio" name="budget" value="risk"><span>Risk or audit</span></label>
+        <label class="opt"><input type="radio" name="budget" value="operations"><span>Operations</span></label>
+        <label class="opt"><input type="radio" name="budget" value="people"><span>Leadership development</span></label>
+        <label class="opt"><input type="radio" name="budget" value="unsure"><span>Not sure</span></label>
+      </div></div>
+    <div class="q"><p class="qt">Would you be open to a 30-minute conversation about your answers?</p>
+      <div class="opts" data-name="open_to_call" data-required>
+        <label class="opt"><input type="radio" name="open_to_call" value="yes"><span>Yes</span></label>
+        <label class="opt"><input type="radio" name="open_to_call" value="no"><span>Not now</span></label>
+      </div></div>
+    <div class="q"><p class="qt">Contact details (optional)</p>
+      <p class="hint">Needed only for the summary report or a conversation. Leave blank to stay anonymous.</p>
+      <div style="display:grid;gap:10px">
+        <input type="text" id="contact_name" name="contact_name" placeholder="Name" autocomplete="name" aria-label="Name">
+        <input type="email" id="contact_email" name="contact_email" placeholder="Email" autocomplete="email" aria-label="Email">
+      </div>
+      <label class="check"><input type="checkbox" id="consent" name="consent"> I agree that Intuint may store my name and email to send me the summary or arrange a conversation, as permitted under POPIA. I can ask for them to be deleted at any time.</label>
+    </div>
+  </section>
+
+  <section data-step="6" hidden>
+    <div class="eyebrow">Your decision-discipline profile</div>
+    <h2>Thank you. Here is your organisation's profile.</h2>
+    <p class="lede" id="resLede"></p>
+    <div class="overall"><b id="overall">–</b><span>out of 100, across the three pillars</span></div>
+    <div class="profile" id="profile"></div>
+    <p class="privacy">This profile reflects your own answers, so it shows how decisions are framed, not how good they are. Intuint measures the second part: it scores real forecasts against real outcomes, privately, over months.</p>
+    <div id="sendState"></div>
+  </section>
+
+  <div class="err" id="err" role="alert"></div>
+  <div class="nav" id="nav">
+    <button type="button" class="ghost" id="back">Back</button>
+    <button type="button" class="primary" id="next">Begin</button>
+  </div>
+  </form>
+</div>
+
+<script>
+(() => {
+"use strict";
+// Where responses are sent. Empty means preview mode (nothing is sent).
+const ENDPOINT = /*__ENDPOINT__*/"";
+const CONTACT = "rudolph@intuint.co.za";
+const LAST_Q = 5, RESULT = 6;
+const $ = s => document.querySelector(s);
+const form = $("#form");
+const sections = [...document.querySelectorAll("[data-step]")];
+let step = 0;
+
+// "None of these" is exclusive; "pick up to three" is capped.
+form.addEventListener("change", e => {
+  const t = e.target;
+  if (t.type !== "checkbox" || !t.checked) return;
+  const group = t.closest("[data-multi]");
+  if (!group) return;
+  const boxes = [...group.querySelectorAll("input[type=checkbox]")];
+  if (t.hasAttribute("data-exclusive")) boxes.forEach(b => { if (b !== t) b.checked = false; });
+  else boxes.forEach(b => { if (b.hasAttribute("data-exclusive")) b.checked = false; });
+  const max = Number(group.dataset.max || 0);
+  if (max && boxes.filter(b => b.checked).length > max) {
+    t.checked = false;
+    $("#err").textContent = `Pick up to ${max}.`;
+  }
+});
+
+function show(n) {
+  step = n;
+  sections.forEach(s => s.hidden = Number(s.dataset.step) !== n);
+  $("#err").textContent = "";
+  $("#back").hidden = n === 0 || n === RESULT;
+  $("#next").hidden = n === RESULT;
+  $("#next").textContent = n === 0 ? "Begin" : n === LAST_Q ? "Submit and see my profile" : "Continue";
+  $("#count").textContent = n > 0 && n <= LAST_Q ? `${n} / ${LAST_Q}` : "";
+  $("#bar").style.width = (Math.min(n, LAST_Q) / LAST_Q * 100) + "%";
+  window.scrollTo({ top: 0 });
+}
+
+function missing(n) {
+  const groups = [...sections[n].querySelectorAll("[data-required]")];
+  groups.forEach(g => g.closest(".q").classList.remove("missing"));
+  const m = groups.filter(g => !form.querySelector(`input[name="${g.dataset.name}"]:checked`));
+  m.forEach(g => g.closest(".q").classList.add("missing"));
+  return m;
+}
+
+function collect() {
+  const a = {};
+  for (const [k, v] of new FormData(form).entries()) {
+    const val = typeof v === "string" ? v.trim() : v;
+    a[k] = k in a ? a[k] + ", " + val : val;
+  }
+  a.consent = $("#consent").checked;
+  if (!a.consent) { delete a.contact_name; delete a.contact_email; }
+  a.survey_version = "2";
+  return a;
+}
+
+// Self-reported discipline on Intuint's three pillars, 0-100 each.
+function score(a) {
+  const pick = (v, map) => map[v] ?? 0;
+  const separation = Math.round((
+    pick(a.gut_recorded, { no: 0, informal: 40, written: 100 }) +
+    pick(a.conflict, { who: 0, gut: 20, analysis: 40, process: 100 }) +
+    pick(a.framework, { none: 0, informal: 40, formal: 100 }) +
+    pick(a.probabilities, { recommendation: 0, sometimes: 50, probability: 100 })
+  ) / 4);
+  const methods = (a.bias_methods || "").split(", ").filter(x => x && x !== "none").length;
+  const bias = Math.round(Math.min(methods, 3) / 3 * 60 +
+    pick(a.bias_frequency, { never: 0, some: 20, always: 40 }));
+  const feedback = Math.round((
+    pick(a.post_review, { rarely: 0, sometimes: 50, always: 100 }) +
+    pick(a.know_reliable, { no: 0, feeling: 30, records: 100 }) +
+    pick(a.decision_log, { never: 0, abandoned: 30, in_use: 100 })
+  ) / 3);
+  return { separation, bias, feedback, overall: Math.round((separation + bias + feedback) / 3) };
+}
+
+const NOTES = {
+  separation: ["Gut and analysis are blended into one recommendation, so you can't tell later which one was right.",
+               "Some separation, but not recorded consistently enough to learn from.",
+               "Gut and analysis are kept apart: the raw material for learning which to trust."],
+  bias: ["Little stands between a biased proposal and approval.",
+         "Some checks exist, applied unevenly.",
+         "Structured checks are routine. The next question is whether they work."],
+  feedback: ["Outcomes rarely loop back to forecasts, so experience accumulates without calibration.",
+             "Some reviews happen, but no record of whose judgement holds up where.",
+             "Forecasts are compared with outcomes: the rarest and most valuable habit."],
+};
+const band = v => v < 34 ? 0 : v < 67 ? 1 : 2;
+
+function renderResult(s) {
+  $("#overall").textContent = s.overall;
+  const weakest = Object.entries({ separation: s.separation, bias: s.bias, feedback: s.feedback })
+    .sort((x, y) => x[1] - y[1])[0][0];
+  const names = { separation: "separating gut from analysis", bias: "catching bias before approval", feedback: "learning from outcomes" };
+  $("#resLede").textContent = s.overall >= 85
+    ? "Your answers describe unusually disciplined decision-making. The open question is whether the discipline is paying off, which only scoring forecasts against outcomes can show."
+    : `Your biggest opportunity is ${names[weakest]}.`;
+  const rows = [
+    ["separation", "Gut vs analysis", "Kept apart?", "var(--gut)"],
+    ["bias", "Bias checks", "Caught before approval?", "var(--intel)"],
+    ["feedback", "Feedback", "Checked against outcomes?", "var(--rose)"],
+  ];
+  $("#profile").innerHTML = rows.map(([k, n, sub, c]) => `
+    <div class="prow">
+      <div class="pn">${n}<small>${sub}</small></div>
+      <div class="ptrack" role="img" aria-label="${n}: ${s[k]} out of 100"><span style="width:${Math.max(s[k], 2)}%;background:${c}"></span></div>
+      <div class="pv">${s[k]}</div>
+      <p class="pnote">${NOTES[k][band(s[k])]}</p>
+    </div>`).join("");
+}
+
+async function submit() {
+  const a = collect(), s = score(a);
+  a.score_separation = s.separation; a.score_bias = s.bias; a.score_feedback = s.feedback; a.score_overall = s.overall;
+  const payload = { survey: "intuint-leadership-v1", submitted_at: new Date().toISOString(), answers: a, calibration: null };
+  renderResult(s);
+  show(RESULT);
+  const box = $("#sendState");
+  if (!ENDPOINT) {
+    box.innerHTML = `<div class="notice">Preview mode: this copy of the survey is not connected to a server, so your answers were not sent anywhere.</div>`;
+    return;
+  }
+  box.innerHTML = `<div class="notice">Saving your answers…</div>`;
+  const body = JSON.stringify(payload);
+  // First as JSON; if the host's firewall refuses that, again as an ordinary form post.
+  const attempts = [
+    () => fetch(ENDPOINT, { method: "POST", headers: { "Content-Type": "application/json" }, body }),
+    () => fetch(ENDPOINT, { method: "POST", body: new URLSearchParams({ payload: body }) }),
+  ];
+  let detail = "";
+  for (const attempt of attempts) {
+    try {
+      const r = await attempt();
+      if (r.ok) {
+        box.innerHTML = `<div class="notice">Your answers are saved. Thank you for your time.${a.open_to_call === "yes" && a.contact_email ? " We'll be in touch to arrange a conversation." : ""}</div>`;
+        return;
+      }
+      const j = await r.json().catch(() => ({}));
+      detail = `error ${r.status}${j.code ? " · " + j.code : ""}`;
+    } catch (e) {
+      detail = "network error";
+    }
+  }
+  box.innerHTML = `<div class="notice">Your answers couldn't be saved just now (${detail}). Please copy the text below and email it to ${CONTACT}.</div>
+    <pre class="copy">${body.replace(/</g, "&lt;")}</pre>`;
+}
+
+$("#next").addEventListener("click", () => {
+  if (step > 0) {
+    const m = missing(step);
+    if (m.length) {
+      $("#err").textContent = m.length === 1 ? "Please answer the question marked in red." : `Please answer the ${m.length} questions marked in red.`;
+      m[0].closest(".q").scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+    if (step === LAST_Q) {
+      const email = $("#contact_email").value.trim();
+      if (email && !$("#consent").checked) { $("#err").textContent = "Tick the consent box to share your contact details, or clear your email to stay anonymous."; return; }
+      if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { $("#err").textContent = "That email address doesn't look complete."; return; }
+      submit(); return;
+    }
+  }
+  show(step + 1);
+});
+$("#back").addEventListener("click", () => show(Math.max(0, step - 1)));
+form.addEventListener("submit", e => e.preventDefault());
+show(0);
+})();
+</script>
+
+</body>
+</html>
