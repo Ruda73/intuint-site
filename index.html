@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en-ZA">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Intuint · How does your organisation judge its own judgement?</title>
+<meta name="description" content="Intuint measures the decisions behind every tonne, rand and hour: how often the gut is right, how often the analysis is right, and when to trust which. Judge, measure, grow.">
+<meta property="og:title" content="Intuint · How does your organisation judge its own judgement?">
+<meta property="og:description" content="Decision intelligence for leadership teams. Judge → Measure → Grow.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.intuint.co.za/">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --bg: #18171C; --panel: #211F26; --line: #34313B; --ink: #ECEAF0; --ink-2: #B9B5C1; --muted: #8E8A97;
+    --rose: #D4578F; --gut: #C27F1E; --analysis: #5389CF;
+    --f-display: "IBM Plex Sans Condensed", "Arial Narrow", Arial, sans-serif;
+    --f-body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+    --f-mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 400 17px/1.6 var(--f-body);
+         padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
+  a { color: inherit; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+
+  header { border-bottom: 1px solid var(--line); }
+  header .wrap { display: flex; align-items: center; justify-content: space-between; height: 68px; gap: 16px; }
+  .mark { font: 700 26px/1 var(--f-display); letter-spacing: -0.3px; text-decoration: none; }
+  .mark i { font-style: normal; color: var(--rose); }
+  nav { display: flex; gap: 22px; font-size: 15px; }
+  nav a { color: var(--ink-2); text-decoration: none; }
+  nav a:hover { color: var(--ink); }
+
+  .eyebrow { font: 600 13px/1 var(--f-display); text-transform: uppercase; letter-spacing: .14em; color: var(--rose); margin: 0 0 18px; }
+  h1 { font: 600 clamp(38px, 6.4vw, 68px)/1.04 var(--f-display); letter-spacing: -0.8px; margin: 0 0 24px; max-width: 15ch; text-wrap: balance; }
+  h2 { font: 600 clamp(28px, 3.6vw, 38px)/1.1 var(--f-display); letter-spacing: -0.4px; margin: 0 0 14px; text-wrap: balance; }
+  h3 { font: 600 22px/1.2 var(--f-display); margin: 0 0 8px; }
+  .lede { color: var(--ink-2); font-size: clamp(18px, 2vw, 20px); max-width: 60ch; margin: 0 0 32px; }
+  section { padding: 88px 0; border-bottom: 1px solid var(--line); }
+  .hero { padding: 104px 0 96px; }
+
+  .btns { display: flex; flex-wrap: wrap; gap: 12px; }
+  .btn { display: inline-block; padding: 14px 22px; border-radius: 6px; font: 600 16px/1 var(--f-body); text-decoration: none;
+         border: 1px solid var(--line); background: var(--panel); color: var(--ink); transition: border-color .15s, background .15s; }
+  .btn:hover { border-color: var(--ink-2); }
+  .btn.primary { background: var(--rose); border-color: var(--rose); color: #18171C; }
+  .btn.primary:hover { background: #e06a9f; border-color: #e06a9f; }
+
+  .loop { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; margin-top: 40px; background: var(--line); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+  .loop > div { background: var(--panel); padding: 32px 28px; }
+  .step { font: 500 13px var(--f-mono); color: var(--muted); margin-bottom: 14px; }
+  .loop h3 .arrow { color: var(--rose); }
+  .loop p { color: var(--ink-2); margin: 0; font-size: 16px; }
+
+  .formulas { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-top: 40px; }
+  .formula { border: 1px solid var(--line); border-radius: 10px; padding: 24px 26px; }
+  .formula .eq { font: 600 clamp(22px, 2.6vw, 28px)/1.2 var(--f-display); margin-bottom: 8px; }
+  .formula .eq .g { color: var(--gut); } .formula .eq .a { color: var(--analysis); } .formula .eq .r { color: var(--rose); }
+  .formula p { color: var(--ink-2); margin: 0; font-size: 15px; }
+
+  .rules { display: grid; grid-template-columns: repeat(2, 1fr); gap: 28px 40px; margin-top: 36px; }
+  .rules b { display: block; font: 600 18px var(--f-display); margin-bottom: 4px; }
+  .rules span { color: var(--ink-2); font-size: 15px; }
+
+  .close { text-align: center; }
+  .close h2 { font-size: clamp(32px, 4.4vw, 48px); max-width: 20ch; margin: 0 auto 16px; }
+  .close .lede { margin: 0 auto 32px; }
+  .close .btns { justify-content: center; }
+
+  footer { padding: 32px 0 48px; color: var(--muted); font: 400 14px/1.6 var(--f-body); }
+  footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; }
+
+  @media (max-width: 760px) {
+    nav a.hide-sm { display: none; }
+    section { padding: 64px 0; }
+    .hero { padding: 64px 0; }
+    .loop, .formulas, .rules { grid-template-columns: 1fr; }
+  }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <a class="mark" href="/" aria-label="Intuint home">intu<i>i</i>nt</a>
+    <nav aria-label="Main">
+      <a class="hide-sm" href="#how">How it works</a>
+      <a class="hide-sm" href="/demo/">Demo</a>
+      <a href="/survey/">Leadership survey</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="wrap">
+      <p class="eyebrow">Decision intelligence for leadership teams</p>
+      <h1>How does your organisation judge its own judgement?</h1>
+      <p class="lede">You measure every tonne, rand and hour. Intuint measures the decisions behind them: how often the gut is right, how often the analysis is right, and when each has earned your trust.</p>
+      <div class="btns">
+        <a class="btn primary" href="/survey/">Take the leadership survey</a>
+        <a class="btn" href="/demo/">See the demo dashboard</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="how">
+    <div class="wrap">
+      <p class="eyebrow">Judge → Measure → Grow</p>
+      <h2>Every decision is a bet. Intuint keeps the score.</h2>
+      <p class="lede">A decision is a prediction with something at stake. A prediction can be checked, and what can be checked can be scored and improved. Yet judgement is the one thing most organisations never measure.</p>
+      <div class="loop">
+        <div>
+          <div class="step">01</div>
+          <h3>Judge <span class="arrow">→</span></h3>
+          <p>Before a decision, each leader commits to what they expect, twice: once from the gut, in under a minute, and once from the analysis. Both are locked in before anyone knows the outcome.</p>
+        </div>
+        <div>
+          <div class="step">02</div>
+          <h3>Measure <span class="arrow">→</span></h3>
+          <p>When the outcome is in, every judgement is scored against reality: how often the gut was right, how often the analysis was right, and how well confidence matched accuracy.</p>
+        </div>
+        <div>
+          <div class="step">03</div>
+          <h3>Grow</h3>
+          <p>Patterns appear that no single decision could show. Leaders learn where their intuition has earned trust and where it needs data beside it. Experience becomes a track record.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <p class="eyebrow">The arithmetic of judgement</p>
+      <h2>Four equations every board should know</h2>
+      <div class="formulas">
+        <div class="formula">
+          <div class="eq"><span class="a">Data</span> + <span class="g">Intuition</span> = <span class="r">Score</span></div>
+          <p>Both channels are counted, so neither wins by default.</p>
+        </div>
+        <div class="formula">
+          <div class="eq"><span class="g">Gut</span> × Feedback = Skill</div>
+          <p>Intuition only becomes skill when outcomes come back to it.</p>
+        </div>
+        <div class="formula">
+          <div class="eq">Confidence − Accuracy = <span class="r">Risk</span></div>
+          <p>The gap between how sure you are and how often you are right is where money is lost.</p>
+        </div>
+        <div class="formula">
+          <div class="eq">Opinion + Record = Evidence</div>
+          <p>A belief becomes evidence once you can see how often its owner has been right.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <p class="eyebrow">Built so it can't be gamed</p>
+      <h2>A score is only worth having if it's honest</h2>
+      <div class="rules">
+        <div><b>Locked before the outcome</b><span>Every forecast is written to a tamper-evident ledger. Nobody can edit a prediction after the fact.</span></div>
+        <div><b>Gut first, against the clock</b><span>Intuition is captured before the analysis is seen, so the two stay genuinely independent.</span></div>
+        <div><b>Independent referees</b><span>Success is defined in advance, and outcomes are recorded by people who did not forecast.</span></div>
+        <div><b>Private by design</b><span>Each person sees their own track record. The organisation sees patterns, never a league table.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="close">
+    <div class="wrap">
+      <h2>Know where your gut has earned trust.</h2>
+      <p class="lede">Start with the leadership survey: a few minutes on how your team decides today, and whether it has any way of telling good judgement from good luck.</p>
+      <div class="btns">
+        <a class="btn primary" href="/survey/">Take the leadership survey</a>
+        <a class="btn" href="mailto:rudolph@intuint.co.za?subject=Intuint">Talk to us</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 Intuint · Pretoria, South Africa</span>
+    <span>Judge → Measure → Grow</span>
+  </div>
+</footer>
+
+</body>
+</html>
