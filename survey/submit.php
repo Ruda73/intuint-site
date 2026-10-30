@@ -14,7 +14,7 @@
 const NOTIFY_TO   = 'rudolph@intuint.co.za';
 const MAIL_FROM   = 'survey@intuint.co.za';
 const MAX_BYTES   = 20000;   // one response is ~2 KB
-const MAX_PER_IP  = 5;       // per hour, to blunt spam
+const MAX_PER_IP  = 40;      // per hour; a whole leadership team often shares one office IP
 const SURVEY_ID   = 'intuint-leadership-v1';
 
 header('Content-Type: application/json; charset=utf-8');
@@ -94,9 +94,11 @@ if (@file_put_contents($dir . '/survey-responses.jsonl', $line, FILE_APPEND | LO
 }
 
 // Email a readable copy. A failed email doesn't lose the response: it's already saved.
-$overall = $answers['score_overall'] ?? '?';
-$who = !empty($answers['consent']) && !empty($answers['contact_name']) ? ' from ' . $answers['contact_name'] : '';
-$subject = 'New Intuint survey response' . preg_replace('/[\r\n]+/', ' ', $who) . " (overall {$overall})";
+// Every answer is visitor-supplied: strip control characters and cap length before it goes in a mail header.
+$clean = fn($v, int $max) => mb_substr(trim(preg_replace('/[\x00-\x1F\x7F]+/u', ' ', (string) $v)), 0, $max);
+$overall = $clean($answers['score_overall'] ?? '?', 8);
+$who = !empty($answers['consent']) && !empty($answers['contact_name']) ? ' from ' . $clean($answers['contact_name'], 80) : '';
+$subject = mb_encode_mimeheader('New Intuint survey response' . $who . " (overall {$overall})", 'UTF-8');
 $body = "A new Leadership Survey response was saved.\n\nResponse ID: {$record['id']}\nReceived: {$record['received_at']}\n\n";
 foreach ($answers as $k => $v) {
     $body .= str_pad($k, 26) . ': ' . (is_bool($v) ? ($v ? 'yes' : 'no') : (string) $v) . "\n";

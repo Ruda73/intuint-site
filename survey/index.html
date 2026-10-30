@@ -469,6 +469,8 @@ async function submit() {
       }
       const j = await r.json().catch(() => ({}));
       detail = `error ${r.status}${j.code ? " · " + j.code : ""}`;
+      // The server read this request and refused it; sending it again as a form post won't help.
+      if ([400, 413, 429].includes(r.status)) break;
     } catch (e) {
       detail = "network error";
     }
