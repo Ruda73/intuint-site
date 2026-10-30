@@ -546,7 +546,7 @@ const blendP = (g, i, w) => 1 / (1 + Math.exp(-(w.gut * lo(g) + w.analysis * lo(
 function wireFlow(D) {
   const s2 = $("#s2"), s3 = $("#s3");
   if (!s2) return;
-  let t0 = 0, decisionId = null, gutLocked = null;
+  let decisionId = null, gutLocked = null;
   const pg = $("#pGut"), pi = $("#pInt");
   pg.addEventListener("input", () => $("#oGut").textContent = pg.value + "%");
   pi.addEventListener("input", () => $("#oInt").textContent = pi.value + "%");
@@ -558,11 +558,9 @@ function wireFlow(D) {
     catch (e) { $("#lock1").innerHTML = `<span class="err">${esc(e.message)}</span>`; return; }
     ["nTitle", "nDom", "nVal", "nCrit", "go1"].forEach(id => $("#" + id).disabled = true);
     s2.setAttribute("aria-disabled", "false"); pg.disabled = false; $("#go2").disabled = false; pg.focus();
-    t0 = performance.now();
   });
   $("#go2").addEventListener("click", async () => {
-    const secs = (performance.now() - t0) / 1000;
-    const rec = { decision_id: decisionId, person_id: D.viewer, channel: "gut", probability: pg.value / 100, elicitation_seconds: +secs.toFixed(1) };
+    const rec = { decision_id: decisionId, person_id: D.viewer, channel: "gut", probability: pg.value / 100 };
     let hash;
     try { hash = STATIC ? await fingerprint(rec) : (await api("/api/forecasts", rec)).ledger_hash; }
     catch (e) { $("#lock1").innerHTML = `<span class="err">${esc(e.message)}</span>`; return; }
@@ -577,7 +575,7 @@ function wireFlow(D) {
   });
   $("#go3").addEventListener("click", async () => {
     const dk = $("#nDom").value, dom = D.me.domains.find(d => d.key === dk);
-    const rec = { decision_id: decisionId, person_id: D.viewer, channel: "analysis", probability: pi.value / 100, elicitation_seconds: 600 };
+    const rec = { decision_id: decisionId, person_id: D.viewer, channel: "analysis", probability: pi.value / 100 };
     let rmd = null;
     try { if (!STATIC) rmd = (await api("/api/forecasts", rec)).recommendation; }
     catch (e) { $("#res").innerHTML = `<span class="err">${esc(e.message)}</span>`; return; }
