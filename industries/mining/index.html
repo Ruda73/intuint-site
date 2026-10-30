@@ -49,6 +49,12 @@
           "acceptedAnswer": { "@type": "Answer", "text": "Software that records, measures and improves how mining leaders decide. Intuint's version measures the judgement itself: how gut calls compare with analytical calls, and how well each leader's confidence matches their results." } },
         { "@type": "Question", "name": "Is Intuint a Cloverpop alternative?",
           "acceptedAnswer": { "@type": "Answer", "text": "It solves a different problem. Cloverpop manages the decision process and its records. Intuint measures the quality of the judgement inside each decision. Use Cloverpop for workflow, Intuint for calibration, or both together." } },
+        { "@type": "Question", "name": "How does Intuint help a mining CFO?",
+          "acceptedAnswer": { "@type": "Answer", "text": "It records the confidence behind every capex approval, feasibility sign-off and contractor award before the money is committed, then scores it against the outcome. The investment committee sees how well estimates have held up on each kind of decision, while each leader sees their own record." } },
+        { "@type": "Question", "name": "How does Intuint help a mining COO?",
+          "acceptedAnswer": { "@type": "Answer", "text": "It scores the operational calls managers make each week, gut and analysis side by side, showing which instincts have earned trust, which need data beside them, and where judgement is drifting." } },
+        { "@type": "Question", "name": "How does Intuint work alongside bowtie analysis?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Bowtie analysis maps hazards and controls. Intuint scores the judgements inside it: risk ratings and control-effectiveness calls are locked in before the outcome and checked against what happened, giving the risk function an audit trail of judgement quality." } },
         { "@type": "Question", "name": "Can Intuint scores be gamed?",
           "acceptedAnswer": { "@type": "Answer", "text": "Every forecast is written to a tamper-evident ledger before the outcome is known. Success is defined in advance, and outcomes are recorded by people who did not make the forecast." } },
         { "@type": "Question", "name": "Does Intuint rank leaders against each other?",
@@ -131,6 +137,15 @@
   .loop h3 .arrow { color: var(--rose); }
   .loop p { color: var(--ink-2); margin: 0; font-size: 16px; }
 
+  .roles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 36px; }
+  .role { border: 1px solid var(--line); border-top: 3px solid var(--rose); border-radius: 10px; padding: 26px 24px; background: var(--panel); display: flex; flex-direction: column; }
+  .role .who { font: 500 12px var(--f-mono); text-transform: uppercase; letter-spacing: .12em; color: var(--muted); margin-bottom: 10px; }
+  .role h3 { margin-bottom: 14px; }
+  .role p { color: var(--ink-2); font-size: 15px; margin: 0 0 12px; }
+  .role p b { color: var(--ink); font-weight: 600; }
+  .role .more { margin-top: auto; padding-top: 6px; font: 600 15px var(--f-body); color: var(--rose); text-decoration: none; }
+  .role .more:hover { text-decoration: underline; }
+
   .defs { display: grid; grid-template-columns: repeat(2, 1fr); gap: 28px 40px; margin: 36px 0 0; }
   .defs dt { font: 600 19px var(--f-display); margin-bottom: 4px; }
   .defs dd { margin: 0; color: var(--ink-2); font-size: 15px; }
@@ -164,7 +179,7 @@
     nav a.hide-sm { display: none; }
     section { padding: 56px 0; }
     .hero { padding: 48px 0 56px; }
-    .loop, .defs, .vs { grid-template-columns: 1fr; }
+    .loop, .defs, .vs, .roles { grid-template-columns: 1fr; }
     .answer { padding: 22px 20px; }
   }
   @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
@@ -204,6 +219,36 @@
       <div class="btns">
         <a class="btn primary" href="/survey/">Take the leadership survey</a>
         <a class="btn" href="/demo/">See the demo dashboard</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="roles">
+    <div class="wrap">
+      <p class="eyebrow">By role</p>
+      <h2>What Intuint answers for each member of the executive team</h2>
+      <div class="roles">
+        <article class="role" id="cfo">
+          <div class="who">Chief Financial Officer</div>
+          <h3>“Which capital calls are we overconfident about?”</h3>
+          <p>About two-thirds of mining cost overruns start in initial assessments, and megaprojects over US$1bn overrun by at least 79% on average.<sup><a href="#s1">1</a></sup> With the industry's cost of capital at 8–10%,<sup><a href="#s4">4</a></sup> an overconfident approval costs more every year it runs.</p>
+          <p><b>Intuint gives you</b> a record of confidence against accuracy for every capex approval, feasibility sign-off and contractor award, locked in before the money is committed. Your investment committee sees how well estimates have held up on each kind of decision, while each leader sees their own record.</p>
+          <a class="more" href="#overruns">See the overrun figures →</a>
+        </article>
+        <article class="role" id="coo">
+          <div class="who">Chief Operating Officer</div>
+          <h3>“Where can my managers trust their instincts?”</h3>
+          <p>Operational calls such as shift plans, equipment faults and ground conditions get fast feedback, so experienced intuition there can become real skill. Yet alignment between planning and execution is as low as 30% at some operations.<sup><a href="#s4">4</a></sup></p>
+          <p><b>Intuint gives you</b> weekly scores on the operational calls your managers make, gut and analysis side by side. You see which instincts have earned trust, which need data beside them, and where judgement is drifting.</p>
+          <a class="more" href="#gut-map">See the gut-feel map →</a>
+        </article>
+        <article class="role" id="cro">
+          <div class="who">Chief Risk Officer</div>
+          <h3>“How does this fit our bowtie and risk register?”</h3>
+          <p>A bowtie maps hazards, causes, consequences and controls. It doesn't record who judged a control to be effective, how confident they were, or whether that judgement held. Every risk rating is a judgement call that is never scored.</p>
+          <p><b>Intuint adds</b> the judgement record your risk framework leaves out. Risk ratings and control-effectiveness calls are locked into a tamper-evident ledger, outcomes are recorded by independent referees, and the result is an audit trail of how well your organisation judges risk.</p>
+          <a class="more" href="#vs-risk">See Intuint vs bowtie →</a>
+        </article>
       </div>
     </div>
   </section>
@@ -303,7 +348,7 @@
         </div>
         <div>
           <h3 id="vs-risk">Intuint vs risk registers and bowtie analysis</h3>
-          <p>Risk registers list what could go wrong. They don't record who predicted what, with how much confidence, or whether they were right. Intuint adds the human-judgement layer that risk frameworks leave out.</p>
+          <p>Risk registers and bowties list what could go wrong and which controls stand in the way. They don't record who judged a likelihood or a control, with how much confidence, or whether they were right. Intuint doesn't replace them. It scores the judgements inside them, so a risk rating carries its author's track record.</p>
         </div>
       </div>
     </div>
@@ -328,6 +373,9 @@
       <h2>Questions mining leaders ask</h2>
       <details open><summary>What is decision intelligence for mining?</summary><p>Software that records, measures and improves how mining leaders decide. Intuint's version measures the judgement itself: how gut calls compare with analytical calls, and how well each leader's confidence matches their results.</p></details>
       <details><summary>Is Intuint a Cloverpop alternative?</summary><p>It solves a different problem. Cloverpop manages the decision process and its records. Intuint measures the quality of the judgement inside each decision. Use Cloverpop for workflow, Intuint for calibration, or both together.</p></details>
+      <details><summary>How does Intuint help a mining CFO?</summary><p>It records the confidence behind every capex approval, feasibility sign-off and contractor award before the money is committed, then scores it against the outcome. The investment committee sees how well estimates have held up on each kind of decision, while each leader sees their own record.</p></details>
+      <details><summary>How does Intuint help a mining COO?</summary><p>It scores the operational calls managers make each week, gut and analysis side by side, showing which instincts have earned trust, which need data beside them, and where judgement is drifting.</p></details>
+      <details><summary>How does Intuint work alongside bowtie analysis?</summary><p>Bowtie analysis maps hazards and controls. Intuint scores the judgements inside it: risk ratings and control-effectiveness calls are locked in before the outcome and checked against what happened, giving the risk function an audit trail of judgement quality.</p></details>
       <details><summary>Can Intuint scores be gamed?</summary><p>Every forecast is written to a tamper-evident ledger before the outcome is known. Success is defined in advance, and outcomes are recorded by people who did not make the forecast.</p></details>
       <details><summary>Does Intuint rank leaders against each other?</summary><p>No. Each person sees their own track record. The organisation sees patterns across decision types, never a league table.</p></details>
       <details><summary>Does Intuint replace analysis?</summary><p>No. It shows where analysis consistently beats gut feel and where experienced intuition adds value, so each is used where it has earned trust.</p></details>
