@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en-ZA">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Exco Noise Audit · Intuint</title>
+<meta name="description" content="How much does your exco disagree on identical facts? Each leader estimates five mining scenarios alone. Intuint shows the spread against what the team expected.">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Layout: summary tiles first, then one strip chart per scenario, then per-leader pattern; a run mode replaces the report while a team answers. */
+/* Matches intuint.co.za: one dark theme, Plex type, rose accent, amber for disagreement. */
+:root {
+  --paper: #18171C;
+  --surface: #211F26;
+  --ink: #ECEAF0;
+  --muted: #8E8A97;
+  --line: #34313B;
+  --accent: #D4578F;
+  --accent-soft: #3A2230;
+  --heat: #C27F1E;
+  --heat-soft: #3A2C17;
+  --font-display: "IBM Plex Sans Condensed", "Arial Narrow", sans-serif;
+  --font-body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--paper); color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 1.55; }
+.wrap { max-width: 1040px; margin: 0 auto; padding: 24px 20px 48px; display: grid; gap: 18px; }
+header.site { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px 20px; border-bottom: 1px solid var(--line); padding-bottom: 14px; }
+.mark { font: 700 26px/1 var(--font-display); color: var(--ink); text-decoration: none; }
+.mark i { font-style: normal; color: var(--accent); }
+nav { display: flex; flex-wrap: wrap; gap: 6px 20px; font-size: 15px; }
+nav a { color: var(--muted); text-decoration: none; }
+nav a:hover, nav a[aria-current] { color: var(--ink); }
+.brand { display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; }
+.brand b { font-family: var(--font-display); letter-spacing: .08em; text-transform: uppercase; font-size: 15px; color: var(--accent); }
+h1 { font-family: var(--font-display); font-weight: 600; font-size: 28px; margin: 0; line-height: 1.15; text-wrap: balance; }
+h2 { font-family: var(--font-display); font-weight: 600; font-size: 21px; margin: 0; text-wrap: balance; }
+h3 { margin: 0; font-size: 16px; }
+p { margin: 0; }
+.lede { max-width: 72ch; color: var(--muted); font-size: 15px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 20px; display: grid; gap: 14px; }
+.row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.pill { font-family: var(--font-mono); font-size: 12px; border-radius: 999px; padding: 2px 10px; border: 1px solid var(--line); color: var(--muted); }
+.pill.example { border-color: var(--heat); color: var(--heat); background: var(--heat-soft); }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; }
+.tile { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+.tile .v { font-family: var(--font-mono); font-size: 30px; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.tile .k { font-size: 13px; color: var(--muted); }
+.tile.hot .v { color: var(--heat); }
+.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.small { font-size: 13px; color: var(--muted); }
+.scen { display: grid; gap: 8px; padding: 14px 0; border-top: 1px solid var(--line); }
+.scen:first-of-type { border-top: 0; padding-top: 0; }
+.scen-head { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; align-items: baseline; }
+.noise-badge { font-family: var(--font-mono); font-size: 13px; padding: 2px 10px; border-radius: 999px; background: var(--heat-soft); color: var(--heat); }
+.chart { overflow-x: auto; }
+svg text { fill: var(--muted); font-family: var(--font-mono); font-size: 11px; }
+svg .lbl { fill: var(--ink); font-size: 10.5px; }
+table { border-collapse: collapse; width: 100%; font-size: 14.5px; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+th { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 500; }
+td.num, th.num { text-align: right; font-family: var(--font-mono); }
+.bar { height: 8px; border-radius: 4px; background: var(--line); position: relative; min-width: 120px; }
+.bar i { position: absolute; top: -3px; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+.bar::after { content: ""; position: absolute; left: 50%; top: -4px; width: 1px; height: 16px; background: var(--muted); }
+button { font: inherit; font-weight: 600; border-radius: 8px; padding: 10px 16px; cursor: pointer; border: 1px solid transparent; }
+.btn-primary { background: var(--accent); color: #18171C; }
+.btn-ghost { background: transparent; border-color: var(--line); color: var(--ink); }
+.btn-primary:disabled { opacity: .45; cursor: not-allowed; }
+button:focus-visible, input:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+label { font-weight: 600; }
+input[type=text], input[type=number] { font: inherit; padding: 9px 11px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); width: 100%; }
+input[type=number] { font-family: var(--font-mono); }
+.field { display: grid; gap: 6px; }
+.facts { margin: 0; padding-left: 18px; display: grid; gap: 2px; font-size: 15px; }
+.input-unit { display: flex; gap: 8px; align-items: center; max-width: 320px; }
+.input-unit span { font-family: var(--font-mono); color: var(--muted); white-space: nowrap; }
+.handover { text-align: center; padding: 36px 20px; display: grid; gap: 14px; justify-items: center; }
+.handover .who { font-family: var(--font-display); font-size: 34px; font-weight: 600; }
+.two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; }
+@media (max-width: 760px) { .two { grid-template-columns: 1fr; } }
+.hidden { display: none !important; }
+.err { color: var(--heat); font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site">
+    <a class="mark" href="/" aria-label="Intuint home">intu<i>i</i>nt</a>
+    <nav aria-label="Main"><a href="/#how">How it works</a><a href="/noise-audit/" aria-current="page">Noise audit</a><a href="/demo/">Demo</a><a href="/survey/">Leadership survey</a></nav>
+  </header>
+  <div class="row" style="justify-content:space-between;align-items:baseline">
+    <h1>Exco Noise Audit</h1>
+    <span class="pill">5 mining scenarios · about 15 minutes</span>
+  </div>
+  <p class="lede">Each leader estimates the same five scenarios alone, in tonnes, rands, Mt, trucks and months. Before they start, each one also seals a guess of how much the team will disagree. The audit then shows how far apart identical information pushed your exco, compared with what they expected.</p>
+
+  <section id="report" class="card" aria-live="polite"></section>
+  <section id="runner" class="card hidden" aria-live="polite"></section>
+  <p class="small">Want this run with your own cases and scored over time? Email <a href="mailto:rudolph@intuint.co.za?subject=Exco%20Noise%20Audit" style="color:var(--ink)">rudolph@intuint.co.za</a>.</p>
+</div>
+
+<script>
+const SCENARIOS = [
+  { id: "hoist", title: "Tomorrow's hoisted tonnes", unit: "t", optimisticIf: "higher", step: 50,
+    facts: ["Shaft 3 averaged 4,200 t a day over the last 20 shifts.", "The rock winder is scheduled down for 6 hours of maintenance tomorrow.", "The last two maintenance days delivered 3,350 t and 3,900 t."],
+    ask: "How many tonnes will Shaft 3 hoist tomorrow?" },
+  { id: "capex", title: "Final cost of a tailings upgrade", unit: "R million", optimisticIf: "lower", step: 1,
+    facts: ["Approved budget: R180m.", "The project is 40% complete and R92m has been spent.", "The main contractor is two months behind schedule."],
+    ask: "What will the project finally cost, in R million?" },
+  { id: "rail", title: "Next quarter's rail deliveries", unit: "Mt", optimisticIf: "higher", step: 0.01,
+    facts: ["Contracted rail allocation: 1.20 Mt a quarter.", "The last four quarters delivered 0.86, 0.91, 0.78 and 0.95 Mt.", "The rail operator says a locomotive overhaul programme finishes this quarter."],
+    ask: "How many Mt will rail deliver next quarter?" },
+  { id: "fleet", title: "Haul trucks available next month", unit: "trucks/day", optimisticIf: "higher", step: 0.5,
+    facts: ["Fleet of 24 haul trucks.", "Availability averaged 82% last month (about 19.7 trucks a day).", "Two trucks go in for engine rebuilds next month, about 3 weeks each."],
+    ask: "How many trucks will be available on an average day next month?" },
+  { id: "ramp", title: "Months to steady state on a new decline", unit: "months", optimisticIf: "lower", step: 0.5,
+    facts: ["The plan: reach 60 kt a month at month 9.", "Month 4 delivered 18 kt against a plan of 26 kt.", "Ventilation upgrades are on schedule."],
+    ask: "In which month from start will the decline first reach 60 kt?" }
+];
+
+// Illustrative exco, clearly marked as example data.
+const EXAMPLE = {
+  example: true,
+  people: [
+    { name: "CEO", expected: 10, a: { hoist: 3400, capex: 230, rail: 0.88, fleet: 18, ramp: 14 } },
+    { name: "COO", expected: 8,  a: { hoist: 4100, capex: 200, rail: 1.12, fleet: 21, ramp: 10 } },
+    { name: "CFO", expected: 15, a: { hoist: 2900, capex: 330, rail: 0.74, fleet: 15, ramp: 22 } },
+    { name: "Mine manager", expected: 10, a: { hoist: 3900, capex: 190, rail: 0.98, fleet: 19, ramp: 11 } },
+    { name: "Head of MRM", expected: 12, a: { hoist: 3200, capex: 265, rail: 0.80, fleet: 17, ramp: 16 } },
+    { name: "Head of logistics", expected: 5, a: { hoist: 3000, capex: 360, rail: 0.70, fleet: 15, ramp: 24 } }
+  ]
+};
+
+let data = EXAMPLE;
+let run = null;
+let showNames = false;
+const anon = i => "Leader " + String.fromCharCode(65 + i);
+const dispName = i => showNames ? data.people[i].name : anon(i);
+const dispShort = i => showNames ? initials(data.people[i].name) : String.fromCharCode(65 + i);
+const $ = id => document.getElementById(id);
+const median = arr => { const s = [...arr].sort((x, y) => x - y); const m = Math.floor(s.length / 2); return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; };
+const fmt = (v, unit) => unit === "Mt" ? v.toFixed(2) : (Math.abs(v) >= 1000 ? Math.round(v).toLocaleString("en-ZA") : (Math.round(v * 10) / 10).toString());
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+// Noise as in a noise audit: the median, over every pair of judges, of |a − b| divided by their average.
+function pairNoise(vals) {
+  const d = [];
+  for (let i = 0; i < vals.length; i++) for (let j = i + 1; j < vals.length; j++) {
+    const avg = (vals[i] + vals[j]) / 2;
+    if (avg > 0) d.push(Math.abs(vals[i] - vals[j]) / avg);
+  }
+  return d.length ? median(d) : 0;
+}
+
+function analyse(d) {
+  const per = SCENARIOS.map(s => {
+    const vals = d.people.map(p => p.a[s.id]);
+    return { s, vals, med: median(vals), min: Math.min(...vals), max: Math.max(...vals), noise: pairNoise(vals) };
+  });
+  const actual = median(per.map(x => x.noise));
+  const expected = median(d.people.map(p => p.expected)) / 100;
+  // Each leader's lean: average signed distance from the group median, in group-range units, flipped so + means optimistic.
+  const lean = d.people.map((p, idx) => {
+    const scores = per.map(x => {
+      const range = x.max - x.min || 1;
+      const sgn = x.s.optimisticIf === "higher" ? 1 : -1;
+      return sgn * (x.vals[idx] - x.med) / range;
+    });
+    return { idx, score: scores.reduce((a, b) => a + b, 0) / scores.length, expected: p.expected };
+  });
+  const noisiest = per.reduce((a, b) => (b.noise > a.noise ? b : a));
+  return { per, actual, expected, lean, noisiest };
+}
+
+function strip(x) {
+  const W = 620, H = 92, L = 16, R = 16;
+  const pad = (x.max - x.min) * 0.12 || Math.abs(x.med) * 0.1 || 1;
+  const lo = x.min - pad, hi = x.max + pad;
+  const sx = v => L + (v - lo) / (hi - lo) * (W - L - R);
+  const yLine = 46;
+  let s = `<svg viewBox="0 0 ${W} ${H}" width="100%" style="min-width:420px" role="img" aria-label="${esc(x.s.title)}: answers from ${fmt(x.min, x.s.unit)} to ${fmt(x.max, x.s.unit)} ${esc(x.s.unit)}, median ${fmt(x.med, x.s.unit)}">`;
+  s += `<line x1="${L}" x2="${W - R}" y1="${yLine}" y2="${yLine}" stroke="var(--line)" stroke-width="2"/>`;
+  s += `<rect x="${sx(x.min)}" y="${yLine - 4}" width="${Math.max(2, sx(x.max) - sx(x.min))}" height="8" rx="4" fill="var(--heat)" fill-opacity=".25"/>`;
+  s += `<line x1="${sx(x.med)}" x2="${sx(x.med)}" y1="${yLine - 16}" y2="${yLine + 16}" stroke="var(--ink)" stroke-width="1.5"/>`;
+  s += `<text x="${sx(x.med)}" y="${yLine + 30}" text-anchor="middle">median ${fmt(x.med, x.s.unit)}</text>`;
+  const sorted = data.people.map((p, i) => ({ i, v: x.vals[i] })).sort((a, b) => a.v - b.v);
+  sorted.forEach((o, k) => {
+    const cx = sx(o.v);
+    s += `<circle cx="${cx}" cy="${yLine}" r="6" fill="var(--accent)" stroke="var(--surface)" stroke-width="2"><title>${esc(dispName(o.i))}: ${fmt(o.v, x.s.unit)} ${esc(x.s.unit)}</title></circle>`;
+    const up = k % 2 === 0;
+    s += `<text class="lbl" x="${cx}" y="${up ? yLine - 14 : yLine - 26}" text-anchor="middle">${esc(dispShort(o.i))}</text>`;
+  });
+  s += `<text x="${L}" y="${H - 4}">${fmt(x.min, x.s.unit)}</text><text x="${W - R}" y="${H - 4}" text-anchor="end">${fmt(x.max, x.s.unit)} ${esc(x.s.unit)}</text>`;
+  return s + `</svg>`;
+}
+function initials(n) { const w = n.trim().split(/\s+/); return w.length === 1 ? w[0].slice(0, 3).toUpperCase() : w.map(x => x[0]).join("").slice(0, 3).toUpperCase(); }
+
+function renderReport() {
+  const r = analyse(data);
+  const ratio = r.expected > 0 ? r.actual / r.expected : null;
+  const leanRows = [...r.lean].sort((a, b) => b.score - a.score).map(l => {
+    const pos = Math.max(0, Math.min(100, 50 + l.score * 50));
+    const word = l.score > 0.15 ? "Leans optimistic" : l.score < -0.15 ? "Leans cautious" : "Near the middle";
+    return `<tr><td>${esc(dispName(l.idx))}</td><td><div class="bar" aria-label="${word}"><i style="left:calc(${pos}% - 1.5px)"></i></div></td><td>${word}</td><td class="num">${l.expected}%</td></tr>`;
+  }).join("");
+
+  $("report").innerHTML = `
+    <div class="row" style="justify-content:space-between">
+      <h2>${data.example ? "Example report" : "Your audit"}</h2>
+      <div class="row">
+        ${data.example ? `<span class="pill example">Illustrative exco · example data</span>` : `<span class="pill">${data.people.length} leaders · ${new Date().toLocaleDateString("en-ZA")}</span>`}
+        <button class="btn-ghost" id="namesBtn" aria-pressed="${showNames}">${showNames ? "Hide names" : "Show names"}</button>
+        <button class="btn-ghost" id="copyBtn">Copy summary</button>
+        <button class="btn-primary" id="startBtn">Run an audit with your team</button>
+        ${data.example ? "" : `<button class="btn-ghost" id="exampleBtn">Show the example</button>`}
+      </div>
+    </div>
+    <p class="small" id="copyMsg" role="status">${showNames ? "Names are showing. Hide them before putting this on a shared screen." : "Leaders are shown as A, B, C… so nobody is singled out. Each person's letter is the order they answered in."}</p>
+    <textarea id="copyFallback" class="hidden" rows="8" readonly style="font-family:var(--font-mono);font-size:13px;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink)"></textarea>
+    <div class="tiles">
+      <div class="tile"><div class="v">${Math.round(r.expected * 100)}%</div><div class="k">Disagreement the team expected (median of sealed guesses)</div></div>
+      <div class="tile hot"><div class="v">${Math.round(r.actual * 100)}%</div><div class="k">Disagreement measured (median gap between any two leaders)</div></div>
+      <div class="tile"><div class="v">${ratio ? ratio.toFixed(1) + "×" : "–"}</div><div class="k">More noise than expected</div></div>
+      <div class="tile"><div class="v" style="font-size:20px;line-height:1.5">${esc(r.noisiest.s.title)}</div><div class="k">Noisiest scenario, ${Math.round(r.noisiest.noise * 100)}% median gap</div></div>
+    </div>
+    <p class="small">How to read the gap: pick any two leaders at random. Half the time, their answers to the same question differ by more than this percentage of their average. In a published audit at an insurer, executives expected about 10% and found 55% (Kahneman, Sibony and Sunstein, <em>Noise</em>, 2021).</p>
+    <div>
+      ${r.per.map(x => `
+        <div class="scen">
+          <div class="scen-head"><h3>${esc(x.s.title)}</h3><span class="noise-badge">${Math.round(x.noise * 100)}% median gap</span></div>
+          <p class="small">${esc(x.s.facts.join(" "))}</p>
+          <div class="chart">${strip(x)}</div>
+        </div>`).join("")}
+    </div>
+    <div class="two">
+      <div style="display:grid;gap:8px">
+        <h3>Who leans which way?</h3>
+        <p class="small">Each leader's average position against the group median across all five scenarios, turned so that right means optimistic (more tonnes, lower cost, faster ramp-up). Consistent lean is bias. The scatter that remains is noise.</p>
+        <div style="overflow-x:auto"><table>
+          <thead><tr><th>Leader</th><th>Cautious ← → Optimistic</th><th></th><th class="num">Expected</th></tr></thead>
+          <tbody>${leanRows}</tbody>
+        </table></div>
+      </div>
+      <div style="display:grid;gap:8px">
+        <h3>What this does and doesn't show</h3>
+        <p>A noise audit needs no outcomes, so it works on day one. It shows how much your leaders disagree on identical facts. It can't show who is <em>right</em>.</p>
+        <p>That second question takes sealed forecasts scored against real results over time, which is what Intuint does. The noisiest scenario above is the natural place to start.</p>
+        <p class="small">Five scenarios and a handful of leaders give a first reading, not a verdict. A full audit uses 10–20 cases drawn from your own operation.</p>
+      </div>
+    </div>
+  `;
+  $("startBtn").addEventListener("click", startSetup);
+  $("namesBtn").addEventListener("click", () => { showNames = !showNames; renderReport(); });
+  $("copyBtn").addEventListener("click", async () => {
+    const text = summaryText(r);
+    try { await navigator.clipboard.writeText(text); $("copyMsg").textContent = "Summary copied. Paste it into an email or your notes."; }
+    catch (e) { const ta = $("copyFallback"); ta.value = text; ta.classList.remove("hidden"); ta.focus(); ta.select(); $("copyMsg").textContent = "Copying isn't allowed here. The summary is selected below: press Ctrl+C or Cmd+C."; }
+  });
+  if (!data.example) $("exampleBtn").addEventListener("click", () => { data = EXAMPLE; renderReport(); });
+}
+
+function summaryText(r) {
+  const lines = [];
+  lines.push(`Exco Noise Audit (Intuint)${data.example ? " - EXAMPLE DATA" : ""}`);
+  lines.push(`${data.people.length} leaders, ${SCENARIOS.length} scenarios`);
+  lines.push(`Expected disagreement: ${Math.round(r.expected * 100)}%`);
+  lines.push(`Measured disagreement: ${Math.round(r.actual * 100)}% (${r.expected > 0 ? (r.actual / r.expected).toFixed(1) + "x expected" : "n/a"})`);
+  lines.push("");
+  r.per.forEach(x => lines.push(`- ${x.s.title}: answers ${fmt(x.min, x.s.unit)} to ${fmt(x.max, x.s.unit)} ${x.s.unit}, median ${fmt(x.med, x.s.unit)}, median gap ${Math.round(x.noise * 100)}%`));
+  lines.push("");
+  lines.push(`Noisiest scenario: ${r.noisiest.s.title}`);
+  lines.push("Measured gap = median difference between any two leaders' answers, as a % of their average.");
+  return lines.join("\n");
+}
+
+function show(which) {
+  $("report").classList.toggle("hidden", which !== "report");
+  $("runner").classList.toggle("hidden", which !== "runner");
+  window.scrollTo({ top: 0 });
+}
+
+function startSetup() {
+  run = { names: [], people: [], who: 0, q: -1, current: null };
+  show("runner");
+  $("runner").innerHTML = `
+    <h2>Set up the audit</h2>
+    <p class="lede">Enter the leaders taking part, one per line (2 to 12). Each person answers alone on this device and hands it on. Nobody sees anyone else's answers until the end.</p>
+    <div class="field"><label for="names">Participants</label>
+      <textarea id="names" rows="6" style="font:inherit;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)" placeholder="CEO&#10;COO&#10;CFO"></textarea>
+    </div>
+    <p class="err" id="setupErr" role="alert"></p>
+    <div class="row"><button class="btn-primary" id="beginBtn">Begin</button><button class="btn-ghost" id="cancelBtn">Back to report</button></div>`;
+  $("beginBtn").addEventListener("click", () => {
+    const names = $("names").value.split("\n").map(s => s.trim()).filter(Boolean);
+    if (names.length < 2 || names.length > 12) { $("setupErr").textContent = "Enter between 2 and 12 names, one per line."; return; }
+    run.names = names; run.who = 0; handover();
+  });
+  $("cancelBtn").addEventListener("click", () => show("report"));
+}
+
+function handover() {
+  const name = run.names[run.who];
+  run.current = { name, expected: null, a: {} };
+  $("runner").innerHTML = `
+    <div class="handover">
+      <span class="small">Participant ${run.who + 1} of ${run.names.length}</span>
+      <div>Hand the device to</div>
+      <div class="who">${esc(name)}</div>
+      <button class="btn-primary" id="readyBtn">I'm ${esc(name)}, start</button>
+    </div>`;
+  $("readyBtn").addEventListener("click", () => { run.q = -1; askExpected(); });
+}
+
+function askExpected() {
+  $("runner").innerHTML = `
+    <span class="small">${esc(run.current.name)} · before you start</span>
+    <h2>How much will your team disagree?</h2>
+    <p>Every leader will see exactly the same facts. Pick any two of them at random: by what percentage do you think their answers will typically differ?</p>
+    <div class="input-unit"><input type="number" id="exp" min="0" max="200" step="1" inputmode="numeric" aria-label="Expected disagreement in percent"><span>%</span></div>
+    <p class="err" id="qErr" role="alert"></p>
+    <div class="row"><button class="btn-primary" id="nextBtn">Seal and continue</button></div>`;
+  $("exp").focus();
+  $("nextBtn").addEventListener("click", () => {
+    const v = parseFloat($("exp").value);
+    if (!isFinite(v) || v < 0) { $("qErr").textContent = "Enter a percentage, for example 10."; return; }
+    run.current.expected = v; run.q = 0; askScenario();
+  });
+}
+
+function askScenario() {
+  const s = SCENARIOS[run.q];
+  $("runner").innerHTML = `
+    <span class="small">${esc(run.current.name)} · scenario ${run.q + 1} of ${SCENARIOS.length}</span>
+    <h2>${esc(s.title)}</h2>
+    <ul class="facts">${s.facts.map(f => `<li>${esc(f)}</li>`).join("")}</ul>
+    <div class="field"><label for="ans">${esc(s.ask)}</label>
+      <div class="input-unit"><input type="number" id="ans" step="${s.step}" min="0" inputmode="decimal"><span>${esc(s.unit)}</span></div>
+    </div>
+    <p class="err" id="qErr" role="alert"></p>
+    <div class="row"><button class="btn-primary" id="nextBtn">${run.q < SCENARIOS.length - 1 ? "Next scenario" : "Finish my answers"}</button></div>`;
+  $("ans").focus();
+  const go = () => {
+    const v = parseFloat($("ans").value);
+    if (!isFinite(v) || v <= 0) { $("qErr").textContent = `Enter a number above zero, in ${s.unit}.`; return; }
+    run.current.a[s.id] = v;
+    if (run.q < SCENARIOS.length - 1) { run.q += 1; askScenario(); }
+    else {
+      run.people.push(run.current);
+      if (run.who < run.names.length - 1) { run.who += 1; handover(); }
+      else { data = { example: false, people: run.people }; showNames = false; show("report"); renderReport(); }
+    }
+  };
+  $("nextBtn").addEventListener("click", go);
+  $("ans").addEventListener("keydown", e => { if (e.key === "Enter") go(); });
+}
+
+renderReport();
+</script>
+</body>
+</html>
