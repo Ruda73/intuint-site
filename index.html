@@ -69,6 +69,14 @@
   .rules b { display: block; font: 600 18px var(--f-display); margin-bottom: 4px; }
   .rules span { color: var(--ink-2); font-size: 15px; }
 
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; margin: 8px 0 14px; background: var(--line); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+  .stats > div { background: var(--panel); padding: 26px 24px; display: grid; gap: 6px; }
+  .stats .num { font: 600 clamp(36px, 5vw, 52px)/1 var(--f-display); }
+  .stats .num.r { color: var(--gut); }
+  .stats span:not(.num) { color: var(--ink-2); font-size: 15px; }
+  .src { color: var(--muted); font-size: 13px; margin: 0 0 28px; }
+  .after { color: var(--ink-2); font-size: 15px; max-width: 60ch; margin: 24px 0 0; }
+
   .close { text-align: center; }
   .close h2 { font-size: clamp(32px, 4.4vw, 48px); max-width: 20ch; margin: 0 auto 16px; }
   .close .lede { margin: 0 auto 32px; }
@@ -81,7 +89,7 @@
     nav a.hide-sm { display: none; }
     section { padding: 64px 0; }
     .hero { padding: 64px 0; }
-    .loop, .formulas, .rules { grid-template-columns: 1fr; }
+    .loop, .formulas, .rules, .stats { grid-template-columns: 1fr; }
   }
   @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 </style>
@@ -93,8 +101,9 @@
     <a class="mark" href="/" aria-label="Intuint home">intu<i>i</i>nt</a>
     <nav aria-label="Main">
       <a class="hide-sm" href="#how">How it works</a>
+      <a href="/noise-audit/">Noise audit</a>
       <a class="hide-sm" href="/demo/">Demo</a>
-      <a href="/survey/">Leadership survey</a>
+      <a class="hide-sm" href="/survey/">Leadership survey</a>
     </nav>
   </div>
 </header>
@@ -106,9 +115,27 @@
       <h1>How does your organisation judge its own judgement?</h1>
       <p class="lede">You measure every tonne, rand and hour. Intuint measures the decisions behind them: how often the gut is right, how often the analysis is right, and when each has earned your trust.</p>
       <div class="btns">
-        <a class="btn primary" href="/survey/">Take the leadership survey</a>
+        <a class="btn primary" href="/noise-audit/">Run the exco noise audit</a>
         <a class="btn" href="/demo/">See the demo dashboard</a>
       </div>
+    </div>
+  </section>
+
+  <section id="noise">
+    <div class="wrap">
+      <p class="eyebrow">Start here: the noise audit</p>
+      <h2>Same facts. How far apart is your exco?</h2>
+      <p class="lede">Give every leader the same five operational scenarios, in tonnes, rands and months, and ask each one for an estimate alone. Before they start, each leader seals a guess of how much the team will disagree. In a published audit at an insurer, executives expected about 10% variation between underwriters pricing identical cases. They found 55%.</p>
+      <div class="stats">
+        <div><span class="num">10%</span><span>disagreement the executives expected</span></div>
+        <div><span class="num r">55%</span><span>median gap they actually found</span></div>
+        <div><span class="num">1 hr</span><span>to run it with your exco, with results the same day</span></div>
+      </div>
+      <p class="src">Source: Kahneman, Sibony &amp; Sunstein, <i>Noise: A Flaw in Human Judgment</i> (2021).</p>
+      <div class="btns">
+        <a class="btn primary" href="/noise-audit/">See the example and run it</a>
+      </div>
+      <p class="after">A noise audit shows how much your leaders disagree. It can't show who is right. That takes sealed forecasts scored against real outcomes, which is what Intuint does next.</p>
     </div>
   </section>
 
@@ -121,7 +148,7 @@
         <div>
           <div class="step">01</div>
           <h3>Judge <span class="arrow">→</span></h3>
-          <p>Before a decision, each leader commits to what they expect, twice: once from the gut, in under a minute, and once from the analysis. Both are locked in before anyone knows the outcome.</p>
+          <p>Before a decision, each leader commits to what they expect, twice: first from the gut, sealed when the decision is tabled and before the analysis is opened, then from the analysis. Both are locked in before anyone knows the outcome.</p>
         </div>
         <div>
           <div class="step">02</div>
@@ -168,7 +195,7 @@
       <h2>A score is only worth having if it's honest</h2>
       <div class="rules">
         <div><b>Locked before the outcome</b><span>Every forecast is written to a tamper-evident ledger. Nobody can edit a prediction after the fact.</span></div>
-        <div><b>Gut first, against the clock</b><span>Intuition is captured before the analysis is seen, so the two stay genuinely independent.</span></div>
+        <div><b>Gut first, sealed</b><span>Intuition is captured before the analysis is opened, so the two stay genuinely independent.</span></div>
         <div><b>Independent referees</b><span>Success is defined in advance, and outcomes are recorded by people who did not forecast.</span></div>
         <div><b>Private by design</b><span>Each person sees their own track record. The organisation sees patterns, never a league table.</span></div>
       </div>
@@ -178,9 +205,10 @@
   <section class="close">
     <div class="wrap">
       <h2>Know where your gut has earned trust.</h2>
-      <p class="lede">Start with the leadership survey: a few minutes on how your team decides today, and whether it has any way of telling good judgement from good luck.</p>
+      <p class="lede">Start with a noise audit: one hour with your exco shows how far apart identical facts push your leaders. Or take the leadership survey on how your team decides today.</p>
       <div class="btns">
-        <a class="btn primary" href="/survey/">Take the leadership survey</a>
+        <a class="btn primary" href="/noise-audit/">Run the exco noise audit</a>
+        <a class="btn" href="/survey/">Take the leadership survey</a>
         <a class="btn" href="mailto:rudolph@intuint.co.za?subject=Intuint">Talk to us</a>
       </div>
     </div>
