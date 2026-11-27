@@ -1,0 +1,22 @@
+# Know the Score (Skool community)
+
+Everything for Intuint's Skool group, *Know the Score: Get Better at Your Job*.
+
+## Contents
+
+- `router/`: job router API. It matches a member's job title to their five-call questionnaire, seals gut answers, records outcomes and scores calibration. Flask and SQLite, with tests. Deployment steps are in `router/README.md`.
+
+## Content (live docs)
+
+The written content lives in two editable docs, so it isn't duplicated here and can't drift out of date:
+
+- **Know the Score: Skool Launch Content**: group setup, About page, Classroom modules 1 and 3 (The De-biaser), weeks 1 and 2 of feed posts, launch checklist. https://claude.ai/artifact/LqaGpUzhATNbyuhTsd3o2Y
+- **What Do They Do for a Living? Starter Snippet Set**: 20 guess-the-job snippets with answers and clue breakdowns. https://claude.ai/artifact/MZspdWMuXhUm4KF58K3hjT
+
+## Important: don't upload `router/` to the public web folder
+
+The router is a Python app, not part of the static site. Deploy it separately through cPanel's **Setup Python App** (for example on `api.intuint.co.za`), with its database stored outside `public_html`. If you upload this repo to the website as-is, leave out `skool/router/`.
+
+## Still to build
+
+- `intuint.co.za/start`: the form page Lesson 1.2 links to. Members type their job, see their five calls and seal their answers.
