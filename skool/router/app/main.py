@@ -8,6 +8,7 @@ Public:
 
 Needs the X-API-Key header (set INTUINT_API_KEY on the server):
   POST /answers                           seal a member's gut answers
+  POST /answers/<id>/analysis             answer after checking the numbers
   POST /answers/<id>/outcome              record what actually happened
   GET  /members/<member_id>/score         accuracy and calibration
 """
@@ -131,6 +132,28 @@ def create_app(db_path=None, data_path=None, api_key=None) -> Flask:
         conn.commit()
         return {"sealed": len(ids), "answer_ids": ids, "sealed_at": rows[0][-1]}, 201
 
+    @app.post("/answers/<int:answer_id>/analysis")
+    def record_analysis(answer_id):
+        require_key()
+        data = body()
+        conn = db()
+        row = conn.execute("SELECT * FROM answers WHERE id = ?", (answer_id,)).fetchone()
+        if row is None:
+            abort(404, f"No answer {answer_id}.")
+        if row["outcome"] is not None:
+            abort(409, "Outcome already recorded; analysis must come before the outcome.")
+        if row["analysis_answer"] is not None:
+            abort(409, "Analysis already recorded; it's final.")
+        q = next(q for q in questionnaires[row["occupation"]]["questions"] if q["id"] == row["question_id"])
+        if data.get("answer") not in q["options"]:
+            abort(400, f"answer must be one of {q['options']}.")
+        if data.get("confidence") not in CONFIDENCE_LEVELS:
+            abort(400, f"confidence must be one of {list(CONFIDENCE_LEVELS)}.")
+        conn.execute("UPDATE answers SET analysis_answer = ?, analysis_confidence = ?, analysis_at = ? WHERE id = ?",
+                     (data["answer"], data["confidence"], store.now(), answer_id))
+        conn.commit()
+        return {"answer_id": answer_id, "gut_answer": row["gut_answer"], "analysis_answer": data["answer"]}
+
     @app.post("/answers/<int:answer_id>/outcome")
     def record_outcome(answer_id):
         require_key()
@@ -147,8 +170,10 @@ def create_app(db_path=None, data_path=None, api_key=None) -> Flask:
         conn.execute("UPDATE answers SET outcome = ?, outcome_at = ? WHERE id = ?",
                      (outcome, store.now(), answer_id))
         conn.commit()
-        return {"answer_id": answer_id, "gut_answer": row["gut_answer"],
-                "outcome": outcome, "gut_was_right": row["gut_answer"] == outcome}
+        an = row["analysis_answer"]
+        return {"answer_id": answer_id, "gut_answer": row["gut_answer"], "analysis_answer": an,
+                "outcome": outcome, "gut_was_right": row["gut_answer"] == outcome,
+                "analysis_was_right": (an == outcome) if an is not None else None}
 
     @app.get("/members/<member_id>/score")
     def member_score(member_id):
@@ -165,11 +190,17 @@ def create_app(db_path=None, data_path=None, api_key=None) -> Flask:
             lvl["calls"] += 1
             lvl["right"] += hit
         n = len(resolved)
+        with_an = [r for r in resolved if r["analysis_answer"] is not None]
+        split = [r for r in with_an if r["analysis_answer"] != r["gut_answer"]]
         return {
             "member_id": member_id,
             "sealed": len(rows),
             "resolved": n,
             "gut_accuracy": round(sum(v["right"] for v in by_level.values()) / n, 2) if n else None,
+            "analysis_accuracy": round(sum(r["analysis_answer"] == r["outcome"] for r in with_an) / len(with_an), 2) if with_an else None,
+            "disagreements": {"count": len(split),
+                              "gut_won": sum(r["gut_answer"] == r["outcome"] for r in split),
+                              "analysis_won": sum(r["analysis_answer"] == r["outcome"] for r in split)},
             # 0 is perfect; always saying 50% scores 0.25.
             "brier_score": round(brier / n, 3) if n else None,
             "calibration": [

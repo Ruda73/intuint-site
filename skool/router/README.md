@@ -33,11 +33,12 @@ GET  /questionnaires/<occupation>
 POST /answers
      {"member_id": "skool-123", "job_title": "SPAR owner", "occupation": "retail_store",
       "answers": [{"question_id": "promo_order", "gut_answer": "More", "confidence": 90}]}
+POST /answers/<id>/analysis {"answer": "Same", "confidence": 70}
 POST /answers/<id>/outcome  {"outcome": "Less"}
 GET  /members/<member_id>/score
 ```
 
-Confidence is 50, 70 or 90. Sealed answers can't be edited, and an outcome can only be recorded once. The score includes gut accuracy, a Brier score (0 is perfect, 0.25 is what always saying 50% earns), and calibration per confidence level.
+Confidence is 50, 70 or 90. Order is fixed: gut (sealed) → analysis (optional, once, before the outcome) → outcome (once). The score adds analysis accuracy and, where gut and analysis disagreed, which one won. The score includes gut accuracy, a Brier score (0 is perfect, 0.25 is what always saying 50% earns), and calibration per confidence level.
 
 ## Run locally
 

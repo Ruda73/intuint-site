@@ -1,7 +1,8 @@
 """SQLite storage for sealed answers and outcomes.
 
 SQLite needs no server, runs on shared hosting, and is one file to back up.
-Sealed answers are never updated; outcomes are recorded alongside them.
+Order is fixed: gut (sealed) -> analysis (optional, once) -> outcome (once).
+Nothing already recorded is ever changed.
 """
 import sqlite3
 from datetime import datetime, timezone
@@ -16,6 +17,9 @@ CREATE TABLE IF NOT EXISTS answers (
     gut_answer      TEXT NOT NULL,
     confidence      INTEGER NOT NULL CHECK (confidence IN (50, 70, 90)),
     sealed_at       TEXT NOT NULL,
+    analysis_answer TEXT,
+    analysis_confidence INTEGER CHECK (analysis_confidence IN (50, 70, 90)),
+    analysis_at     TEXT,
     outcome         TEXT,
     outcome_at      TEXT
 );

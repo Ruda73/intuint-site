@@ -87,3 +87,21 @@ def test_start_page_uses_same_questionnaires():
         pytest.skip("start/ page not present")
     assert json.loads(site_copy.read_text()) == json.loads((here / "data" / "questionnaires.json").read_text()), \
         "Copy skool/router/data/questionnaires.json to start/questionnaires.json"
+
+
+def test_gut_then_analysis_then_outcome(client):
+    r = client.post("/answers", headers=KEY, json={
+        "member_id": "m2", "occupation": "sales",
+        "answers": [{"question_id": "deal_close", "gut_answer": "Yes", "confidence": 70},
+                    {"question_id": "monthly_target", "gut_answer": "No", "confidence": 50}]})
+    a, b = r.json["answer_ids"]
+    assert client.post(f"/answers/{a}/analysis", headers=KEY, json={"answer": "No", "confidence": 90}).status_code == 200
+    assert client.post(f"/answers/{a}/analysis", headers=KEY, json={"answer": "Yes", "confidence": 90}).status_code == 409
+    out = client.post(f"/answers/{a}/outcome", headers=KEY, json={"outcome": "No"}).json
+    assert out["gut_was_right"] is False and out["analysis_was_right"] is True
+    # outcome first closes the analysis step
+    client.post(f"/answers/{b}/outcome", headers=KEY, json={"outcome": "No"})
+    assert client.post(f"/answers/{b}/analysis", headers=KEY, json={"answer": "No", "confidence": 50}).status_code == 409
+    s = client.get("/members/m2/score", headers=KEY).json
+    assert s["analysis_accuracy"] == 1.0
+    assert s["disagreements"] == {"count": 1, "gut_won": 0, "analysis_won": 1}
