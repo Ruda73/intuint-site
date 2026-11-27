@@ -17,6 +17,12 @@ The written content lives in two editable docs, so it isn't duplicated here and 
 
 The router is a Python app, not part of the static site. Deploy it separately through cPanel's **Setup Python App** (for example on `api.intuint.co.za`), with its database stored outside `public_html`. If you upload this repo to the website as-is, leave out `skool/router/`.
 
-## Still to build
+## The member page: `/start/`
 
-- `intuint.co.za/start`: the form page Lesson 1.2 links to. Members type their job, see their five calls and seal their answers.
+`start/` in the site root is the page Lesson 1.2 links to: https://www.intuint.co.za/start/ (add `?job=...` to prefill the job). Members type their job, get their five calls, seal their gut answers, and later log outcomes and see their own score. It's plain HTML and PHP, like the survey, so it runs on the normal hosting with nothing to install.
+
+- Sealed calls are saved to `~/intuint-data/start-sealed.jsonl` (outside the public folder) and emailed to rudolph@intuint.co.za.
+- Outcomes go to `~/intuint-data/start-outcomes.jsonl`. Only the browser that sealed a call can log its outcome, and only once.
+- The page routes jobs in the browser with `start/route.js`, which follows the same rules as the Python router.
+
+**Editing questions:** change `skool/router/data/questionnaires.json`, then copy it to `start/questionnaires.json`. A router test fails if the two copies differ.
