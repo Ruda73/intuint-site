@@ -75,3 +75,15 @@ def test_rejects_bad_answers(client):
     assert client.post("/answers", headers=KEY, json=bad).status_code == 400
     bad["answers"][0].update(gut_answer="More", confidence=80)
     assert client.post("/answers", headers=KEY, json=bad).status_code == 400
+
+
+def test_start_page_uses_same_questionnaires():
+    """start/questionnaires.json (used by the website) must match the router's copy."""
+    import json
+    from pathlib import Path
+    here = Path(__file__).resolve().parents[1]
+    site_copy = here.parents[1] / "start" / "questionnaires.json"
+    if not site_copy.exists():
+        pytest.skip("start/ page not present")
+    assert json.loads(site_copy.read_text()) == json.loads((here / "data" / "questionnaires.json").read_text()), \
+        "Copy skool/router/data/questionnaires.json to start/questionnaires.json"
