@@ -4,8 +4,12 @@
  * Called by start/index.html.
  *
  *   {"action":"seal", "job_title", "occupation", "member" (Skool name, optional),
- *    "email" (optional), "answers":[{"question_id","gut_answer","confidence"}]}
+ *    "email" (optional; needs "consent": true), "client_sealed_at" (set when a
+ *    browser retries a seal it couldn't send earlier),
+ *    "answers":[{"question_id","gut_answer","confidence"}]}
  *     -> {"ok":true, "id", "token", "sealed_at"}
+ *   {"action":"load", "id", "token"}
+ *     -> {"ok":true, "record"}   (the member's personal link reloads their calls on any device)
  *   {"action":"analysis", "id", "token", "question_id", "answer", "confidence"}
  *     -> {"ok":true}            (after checking the numbers; before the outcome)
  *   {"action":"outcome", "id", "token", "question_id", "outcome"}
@@ -21,8 +25,10 @@
 const NOTIFY_TO  = 'rudolph@intuint.co.za';
 const MAIL_FROM  = 'start@intuint.co.za';
 const MAX_BYTES  = 8000;
-const SEALS_PER_HOUR    = 10;
-const OUTCOMES_PER_HOUR = 60;
+const SEALS_PER_HOUR    = 40;    // a whole shop on one Wi-Fi must fit
+const OUTCOMES_PER_HOUR = 300;
+const LOADS_PER_HOUR    = 120;
+const SITE = 'https://www.intuint.co.za';
 const CONFIDENCE = [50, 70, 90];
 
 header('Content-Type: application/json; charset=utf-8');
@@ -137,6 +143,13 @@ if ($action === 'seal') {
     if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
         reply(400, ['ok' => false, 'code' => 'invalid_email']);
     }
+    $member = clean($data['member'] ?? '', 120);
+    $consent = ($data['consent'] ?? false) === true;
+    if (($email !== '' || $member !== '') && !$consent) {
+        reply(400, ['ok' => false, 'code' => 'consent_required']);
+    }
+    $clientSealed = clean($data['client_sealed_at'] ?? '', 40);
+    if ($clientSealed !== '' && !preg_match('/^\d{4}-\d\d-\d\dT[\d:.]+Z?$/', $clientSealed)) $clientSealed = '';
     rate_limit($dir, 'seal', SEALS_PER_HOUR);
 
     $token = bin2hex(random_bytes(16));
@@ -146,8 +159,10 @@ if ($action === 'seal') {
         'sealed_at'   => gmdate('c'),
         'job_title'   => clean($data['job_title'] ?? '', 120),
         'occupation'  => $occ,
-        'member'      => clean($data['member'] ?? '', 120),
+        'client_sealed_at' => $clientSealed ?: null,   // set only for late-sent seals; not proof of timing
+        'member'      => $member,
         'email'       => $email,
+        'consent'     => $consent ? gmdate('c') : null,
         'answers'     => array_values($answers),
     ];
     $line = json_encode($record, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . "\n";
@@ -163,7 +178,51 @@ if ($action === 'seal') {
     @mail(NOTIFY_TO, 'Sealed calls: ' . preg_replace('/[\r\n]+/', ' ', $who) . " ({$occ})", $body,
           "From: Know the Score <" . MAIL_FROM . ">\r\nContent-Type: text/plain; charset=utf-8");
 
+    // Send the member their personal link, so they can open their calls on any device.
+    if ($email !== '') {
+        $link = SITE . "/start/?ref={$record['id']}.{$token}";
+        @mail($email, 'Your sealed calls (Know the Score)',
+              "Your five calls are sealed.\n\nOpen them on any device, add your analysis and log outcomes here:\n{$link}\n\nKeep this link private: anyone with it can log outcomes for these calls.\n\nRudolph\nIntuint. Know the score.\n",
+              "From: Know the Score <" . MAIL_FROM . ">\r\nReply-To: " . NOTIFY_TO . "\r\nContent-Type: text/plain; charset=utf-8");
+    }
+
     reply(200, ['ok' => true, 'id' => $record['id'], 'token' => $token, 'sealed_at' => $record['sealed_at']]);
+}
+
+if ($action === 'load') {
+    $id = (string) ($data['id'] ?? '');
+    $token = (string) ($data['token'] ?? '');
+    if (!preg_match('/^[a-f0-9]{16}$/', $id) || !preg_match('/^[a-f0-9]{32}$/', $token)) {
+        reply(400, ['ok' => false, 'code' => 'invalid_reference']);
+    }
+    rate_limit($dir, 'load', LOADS_PER_HOUR);
+    $seal = find_lines($sealedFile, fn($r) => ($r['id'] ?? '') === $id)[0] ?? null;
+    if (!$seal || !hash_equals($seal['token_hash'], hash('sha256', $token))) {
+        reply(404, ['ok' => false, 'code' => 'not_found']);
+    }
+    $analysis = []; foreach (find_lines($analysisFile, fn($r) => ($r['id'] ?? '') === $id) as $r) $analysis[$r['question_id']] = $r;
+    $outcomes = []; foreach (find_lines($outcomeFile, fn($r) => ($r['id'] ?? '') === $id) as $r) $outcomes[$r['question_id']] = $r;
+    $byId = [];
+    foreach ($questionnaires[$seal['occupation']]['questions'] ?? [] as $q) $byId[$q['id']] = $q;
+    $answers = [];
+    foreach ($seal['answers'] as $a) {
+        $q = $byId[$a['question_id']] ?? null;
+        if (!$q) continue;
+        $an = $analysis[$a['question_id']] ?? null;
+        $answers[] = [
+            'question_id' => $a['question_id'], 'prompt' => $q['prompt'], 'outcome_prompt' => $q['outcome_prompt'],
+            'options' => $q['options'], 'know_in_days' => $q['know_in_days'] ?? null,
+            'gut_answer' => $a['gut_answer'], 'confidence' => $a['confidence'],
+            'analysis' => $an ? ['answer' => $an['analysis_answer'], 'confidence' => $an['confidence']] : null,
+            'outcome' => $outcomes[$a['question_id']]['outcome'] ?? null,
+        ];
+    }
+    reply(200, ['ok' => true, 'record' => [
+        'id' => $id, 'token' => $token, 'sent' => true, 'sealed_at' => $seal['sealed_at'],
+        'occupation' => $seal['occupation'], 'job_title' => $seal['job_title'],
+        'track_title' => $questionnaires[$seal['occupation']]['title'] ?? $seal['occupation'],
+        'answers' => $answers,
+    ]]);
 }
 
 if ($action === 'analysis' || $action === 'outcome') {

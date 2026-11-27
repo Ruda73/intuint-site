@@ -3,69 +3,365 @@
     "title": "Retail: store owners and managers",
     "intro": "Five calls that make or break a store. Seal your gut answer now, before you look at the numbers. Come back when the outcome is known.",
     "keywords": {
-      "retail": 3, "store": 3, "shop": 3, "supermarket": 3, "grocer": 3, "grocery": 3,
-      "spar": 3, "franchisee": 3, "franchise": 2, "merchandiser": 3, "cashier": 3,
-      "tuck shop": 3, "spaza": 3, "butchery": 3, "bottle store": 3, "pharmacy": 2,
-      "branch manager": 2, "floor manager": 3, "stock controller": 3, "receiving clerk": 3,
-      "owner": 1
+      "retail": 3,
+      "store": 3,
+      "shop": 3,
+      "supermarket": 3,
+      "grocer": 3,
+      "grocery": 3,
+      "spar": 3,
+      "franchisee": 3,
+      "franchise": 2,
+      "merchandiser": 3,
+      "cashier": 3,
+      "tuck shop": 3,
+      "spaza": 3,
+      "butchery": 3,
+      "bottle store": 3,
+      "pharmacy": 2,
+      "branch manager": 2,
+      "floor manager": 3,
+      "stock controller": 3,
+      "receiving clerk": 3,
+      "owner": 1,
+      "pick n pay": 3,
+      "checkers": 3,
+      "shoprite": 3,
+      "woolworths": 3,
+      "boxer": 2,
+      "category manager": 3,
+      "buyer": 2,
+      "winkel": 3,
+      "winkeleienaar": 3,
+      "supermark": 3,
+      "kassier": 3,
+      "eienaar": 1,
+      "kafee": 3
     },
     "questions": [
-      {"id": "promo_order", "prompt": "For your next promotion, will you order more, the same, or less stock than last time?", "options": ["More", "Same", "Less"], "outcome_prompt": "Looking back, what should you have ordered?"},
-      {"id": "weekend_staff", "prompt": "Will you need extra staff on the floor this coming weekend?", "options": ["Yes", "No"], "outcome_prompt": "Looking back, did you need extra staff?"},
-      {"id": "shrinkage_cause", "prompt": "Is the stock loss on your worst line mainly theft, receiving errors, or damage and expiry?", "options": ["Theft", "Receiving errors", "Damage or expiry"], "outcome_prompt": "After checking, what was the main cause?"},
-      {"id": "new_line", "prompt": "Will the new product you're stocking this month sell through before its reorder point?", "options": ["Yes", "No"], "outcome_prompt": "Did it sell through in time?"},
-      {"id": "supplier_otif", "prompt": "Will your least reliable supplier deliver in full and on time this week?", "options": ["Yes", "No"], "outcome_prompt": "Did they deliver in full and on time?"}
+      {
+        "id": "promo_order",
+        "prompt": "For this week's promotion, will you order more, the same, or less stock than last time?",
+        "options": [
+          "More",
+          "Same",
+          "Less"
+        ],
+        "outcome_prompt": "Looking back, what should you have ordered?",
+        "know_in_days": 7
+      },
+      {
+        "id": "weekend_staff",
+        "prompt": "Will you need extra staff on the floor this coming weekend?",
+        "options": [
+          "Yes",
+          "No"
+        ],
+        "outcome_prompt": "Looking back, did you need extra staff?",
+        "know_in_days": 7
+      },
+      {
+        "id": "shrinkage_cause",
+        "prompt": "Is the stock loss on your worst line mainly theft, receiving errors, or damage and expiry?",
+        "options": [
+          "Theft",
+          "Receiving errors",
+          "Damage or expiry"
+        ],
+        "outcome_prompt": "After checking, what was the main cause?",
+        "know_in_days": 14
+      },
+      {
+        "id": "new_line",
+        "prompt": "Will the new product you're stocking sell through within two weeks?",
+        "options": [
+          "Yes",
+          "No"
+        ],
+        "outcome_prompt": "Did it sell through within two weeks?",
+        "know_in_days": 14
+      },
+      {
+        "id": "supplier_otif",
+        "prompt": "Will your least reliable supplier deliver in full and on time this week?",
+        "options": [
+          "Yes",
+          "No"
+        ],
+        "outcome_prompt": "Did they deliver in full and on time?",
+        "know_in_days": 7
+      }
+    ],
+    "exclude": [
+      "shop steward",
+      "workshop",
+      "shop floor"
     ]
   },
   "mining_operations": {
     "title": "Mining: operations, engineering and safety",
     "intro": "Five calls every operation lives with. Seal your gut answer before you open the reports.",
     "keywords": {
-      "mine": 3, "mining": 3, "miner": 3, "shift boss": 3, "shiftboss": 3, "mine overseer": 3,
-      "underground": 3, "open pit": 3, "pit": 2, "geologist": 3, "metallurgist": 3, "smelter": 3,
-      "plant": 2, "processing": 2, "reliability": 2, "rock engineer": 3, "blaster": 3,
-      "ventilation": 2, "safety officer": 2, "she": 1, "artisan": 2, "fitter": 2, "boilermaker": 2,
-      "engineer": 1
+      "mine": 4,
+      "mining": 4,
+      "miner": 3,
+      "shift boss": 3,
+      "shiftboss": 3,
+      "mine overseer": 3,
+      "underground": 3,
+      "open pit": 3,
+      "pit": 2,
+      "geologist": 3,
+      "metallurgist": 3,
+      "smelter": 3,
+      "plant": 2,
+      "processing": 2,
+      "reliability": 2,
+      "rock engineer": 3,
+      "blaster": 3,
+      "ventilation": 2,
+      "safety officer": 2,
+      "she": 1,
+      "artisan": 2,
+      "fitter": 2,
+      "boilermaker": 2,
+      "engineer": 1,
+      "shop steward": 3,
+      "storeman": 2,
+      "store keeper": 1,
+      "storekeeper": 1,
+      "myn": 4,
+      "mynbou": 4,
+      "mynwerker": 4,
+      "skofbaas": 4,
+      "ondergronds": 3,
+      "aanleg": 2
     },
     "questions": [
-      {"id": "weekly_target", "prompt": "Will your section hit this week's production target?", "options": ["Yes", "No"], "outcome_prompt": "Did it hit the target?"},
-      {"id": "equipment_stop", "prompt": "Will the equipment issue you're watching cause an unplanned stop within 30 days?", "options": ["Yes", "No"], "outcome_prompt": "Did it cause an unplanned stop?"},
-      {"id": "contractor_schedule", "prompt": "Will the contractor on your current job finish on schedule?", "options": ["Yes", "No"], "outcome_prompt": "Did they finish on schedule?"},
-      {"id": "incident_shift", "prompt": "Which shift will log more incidents and near misses this month?", "options": ["Day", "Night", "About the same"], "outcome_prompt": "Which shift logged more?"},
-      {"id": "quarter_budget", "prompt": "Will your area finish the quarter under, on, or over budget?", "options": ["Under", "On", "Over"], "outcome_prompt": "Where did it finish?"}
+      {
+        "id": "weekly_target",
+        "prompt": "Will your section hit this week's production target?",
+        "options": [
+          "Yes",
+          "No"
+        ],
+        "outcome_prompt": "Did it hit the target?",
+        "know_in_days": 7
+      },
+      {
+        "id": "equipment_stop",
+        "prompt": "Will the equipment issue you're watching cause an unplanned stop within 14 days?",
+        "options": [
+          "Yes",
+          "No"
+        ],
+        "outcome_prompt": "Did it cause an unplanned stop within 14 days?",
+        "know_in_days": 14
+      },
+      {
+        "id": "contractor_schedule",
+        "prompt": "Will the contractor on your current job finish this week's planned work on time?",
+        "options": [
+          "Yes",
+          "No"
+        ],
+        "outcome_prompt": "Did they finish this week's planned work on time?",
+        "know_in_days": 7
+      },
+      {
+        "id": "incident_shift",
+        "prompt": "Which shift will log more incidents and near misses over the next two weeks?",
+        "options": [
+          "Day",
+          "Night",
+          "About the same"
+        ],
+        "outcome_prompt": "Which shift logged more?",
+        "know_in_days": 14
+      },
+      {
+        "id": "quarter_budget",
+        "prompt": "Will your area finish the quarter under, on, or over budget?",
+        "options": [
+          "Under",
+          "On",
+          "Over"
+        ],
+        "outcome_prompt": "Where did it finish?",
+        "know_in_days": 90
+      }
+    ],
+    "exclude": [
+      "casino",
+      "factory",
+      "manufacturing",
+      "bottling",
+      "brewery",
+      "power plant",
+      "nursery"
     ]
   },
   "sales": {
     "title": "Sales: reps, account managers and business development",
     "intro": "Five calls that decide your month. Seal your gut answer before you check the CRM.",
     "keywords": {
-      "sales": 3, "salesperson": 3, "rep": 2, "representative": 2, "account manager": 3,
-      "account executive": 3, "business development": 3, "bdm": 3, "bdr": 3, "sdr": 3,
-      "key account": 3, "broker": 2, "estate agent": 3, "agent": 1, "telesales": 3,
-      "closer": 2, "consultant": 1
+      "sales": 3,
+      "salesperson": 3,
+      "rep": 2,
+      "representative": 2,
+      "account manager": 3,
+      "account executive": 3,
+      "business development": 3,
+      "bdm": 3,
+      "bdr": 3,
+      "sdr": 3,
+      "key account": 3,
+      "broker": 2,
+      "estate agent": 3,
+      "agent": 1,
+      "telesales": 3,
+      "closer": 2,
+      "consultant": 1,
+      "verkope": 3,
+      "verkoops": 3,
+      "verkoopsverteenwoordiger": 3,
+      "verkoopsbestuurder": 3,
+      "verteenwoordiger": 2
     },
     "questions": [
-      {"id": "deal_close", "prompt": "Will your biggest open deal close this month?", "options": ["Yes", "No"], "outcome_prompt": "Did it close this month?"},
-      {"id": "deal_price", "prompt": "Will it close above, at, or below the price you quoted?", "options": ["Above", "At", "Below"], "outcome_prompt": "Where did it close?"},
-      {"id": "top_lead", "prompt": "Will the new lead you rate highest this week become a customer?", "options": ["Yes", "No"], "outcome_prompt": "Did they become a customer?"},
-      {"id": "monthly_target", "prompt": "Will you hit your monthly target?", "options": ["Yes", "No"], "outcome_prompt": "Did you hit it?"},
-      {"id": "main_objection", "prompt": "What will be the main objection in your next pitch?", "options": ["Price", "Timing", "Trust or risk", "No real need"], "outcome_prompt": "What was the main objection?"}
+      {
+        "id": "deal_close",
+        "prompt": "Will your biggest open deal close within the next two weeks?",
+        "options": [
+          "Yes",
+          "No"
+        ],
+        "outcome_prompt": "Did it close within two weeks?",
+        "know_in_days": 14
+      },
+      {
+        "id": "deal_price",
+        "prompt": "Will it close above, at, or below the price you quoted?",
+        "options": [
+          "Above",
+          "At",
+          "Below"
+        ],
+        "outcome_prompt": "Where did it close?",
+        "know_in_days": 30
+      },
+      {
+        "id": "top_lead",
+        "prompt": "Will the new lead you rate highest this week agree to a next meeting within two weeks?",
+        "options": [
+          "Yes",
+          "No"
+        ],
+        "outcome_prompt": "Did they agree to a next meeting?",
+        "know_in_days": 14
+      },
+      {
+        "id": "monthly_target",
+        "prompt": "Will you hit your monthly target?",
+        "options": [
+          "Yes",
+          "No"
+        ],
+        "outcome_prompt": "Did you hit it?",
+        "know_in_days": 30
+      },
+      {
+        "id": "main_objection",
+        "prompt": "What will be the main objection in your next pitch?",
+        "options": [
+          "Price",
+          "Timing",
+          "Trust or risk",
+          "No real need"
+        ],
+        "outcome_prompt": "What was the main objection?",
+        "know_in_days": 7
+      }
     ]
   },
   "people_manager": {
     "title": "Managers and team leads",
     "intro": "Five calls about people. Seal your gut answer before you talk yourself out of it.",
     "keywords": {
-      "manager": 1, "team lead": 2, "team leader": 2, "supervisor": 2, "head of": 2,
-      "director": 1, "hr": 2, "human resources": 3, "people manager": 3, "recruiter": 2,
-      "talent": 2, "foreman": 2, "executive": 1, "ceo": 1, "coo": 1, "gm": 1, "general manager": 1
+      "manager": 1,
+      "team lead": 2,
+      "team leader": 2,
+      "supervisor": 2,
+      "head of": 2,
+      "director": 1,
+      "hr": 2,
+      "human resources": 3,
+      "people manager": 3,
+      "recruiter": 2,
+      "talent": 2,
+      "foreman": 2,
+      "executive": 1,
+      "ceo": 1,
+      "coo": 1,
+      "gm": 1,
+      "general manager": 1,
+      "bestuurder": 1,
+      "spanleier": 2,
+      "toesighouer": 2,
+      "menslike hulpbronne": 3,
+      "personeelbestuurder": 3
     },
     "questions": [
-      {"id": "hire_retention", "prompt": "Will the last person you hired still be on your team in 12 months?", "options": ["Yes", "No"], "outcome_prompt": "Were they still on the team after 12 months?"},
-      {"id": "key_deadline", "prompt": "Will your team's most important deliverable this month land on time?", "options": ["Yes", "No"], "outcome_prompt": "Did it land on time?"},
-      {"id": "performance_talk", "prompt": "Will the person you're most worried about improve after your next conversation?", "options": ["Yes", "No"], "outcome_prompt": "Did they improve?"},
-      {"id": "resignation", "prompt": "Will anyone on your team resign in the next three months?", "options": ["Yes", "No"], "outcome_prompt": "Did anyone resign?"},
-      {"id": "quiet_disagreement", "prompt": "In your next team meeting, will the unspoken disagreement come out in the open?", "options": ["Yes", "No"], "outcome_prompt": "Did it come out?"}
+      {
+        "id": "hire_retention",
+        "prompt": "Will the last person you hired meet the expectations you set for them this month?",
+        "options": [
+          "Yes",
+          "No"
+        ],
+        "outcome_prompt": "Did they meet those expectations?",
+        "know_in_days": 30
+      },
+      {
+        "id": "key_deadline",
+        "prompt": "Will your team's most important deliverable this week land on time?",
+        "options": [
+          "Yes",
+          "No"
+        ],
+        "outcome_prompt": "Did it land on time?",
+        "know_in_days": 7
+      },
+      {
+        "id": "performance_talk",
+        "prompt": "Will the person you're most worried about show improvement within two weeks of your next conversation?",
+        "options": [
+          "Yes",
+          "No"
+        ],
+        "outcome_prompt": "Did they improve within two weeks?",
+        "know_in_days": 14
+      },
+      {
+        "id": "resignation",
+        "prompt": "Will anyone on your team resign in the next three months?",
+        "options": [
+          "Yes",
+          "No"
+        ],
+        "outcome_prompt": "Did anyone resign?",
+        "know_in_days": 90
+      },
+      {
+        "id": "quiet_disagreement",
+        "prompt": "In your next team meeting, will the unspoken disagreement come out in the open?",
+        "options": [
+          "Yes",
+          "No"
+        ],
+        "outcome_prompt": "Did it come out?",
+        "know_in_days": 7
+      }
     ]
   },
   "general": {
@@ -73,11 +369,59 @@
     "intro": "We don't have a track for your job yet, so start with the calls everyone makes. Seal your gut answer now.",
     "keywords": {},
     "questions": [
-      {"id": "weekly_task", "prompt": "Will your most important task this week be finished by Friday?", "options": ["Yes", "No"], "outcome_prompt": "Was it finished by Friday?"},
-      {"id": "estimate", "prompt": "Will the most recent estimate you gave (time or cost) turn out under, on, or over?", "options": ["Under", "On", "Over"], "outcome_prompt": "How did it turn out?"},
-      {"id": "escalation", "prompt": "Will the next decision you take to your boss get the answer you expect?", "options": ["Yes", "No"], "outcome_prompt": "Did you get the answer you expected?"},
-      {"id": "dreaded_meeting", "prompt": "Will the meeting you're most dreading go better, as expected, or worse?", "options": ["Better", "As expected", "Worse"], "outcome_prompt": "How did it go?"},
-      {"id": "change_mind", "prompt": "Will you reverse a decision you made this month?", "options": ["Yes", "No"], "outcome_prompt": "Did you reverse it?"}
-    ]
+      {
+        "id": "weekly_task",
+        "prompt": "Will your most important task this week be finished by Friday?",
+        "options": [
+          "Yes",
+          "No"
+        ],
+        "outcome_prompt": "Was it finished by Friday?",
+        "know_in_days": 7
+      },
+      {
+        "id": "estimate",
+        "prompt": "Will the next estimate you give (time or cost) turn out under, on, or over?",
+        "options": [
+          "Under",
+          "On",
+          "Over"
+        ],
+        "outcome_prompt": "How did it turn out?",
+        "know_in_days": 30
+      },
+      {
+        "id": "escalation",
+        "prompt": "Will the next decision you take to your boss get the answer you expect?",
+        "options": [
+          "Yes",
+          "No"
+        ],
+        "outcome_prompt": "Did you get the answer you expected?",
+        "know_in_days": 14
+      },
+      {
+        "id": "dreaded_meeting",
+        "prompt": "Will the meeting you're most dreading go better, as expected, or worse?",
+        "options": [
+          "Better",
+          "As expected",
+          "Worse"
+        ],
+        "outcome_prompt": "How did it go?",
+        "know_in_days": 7
+      },
+      {
+        "id": "change_mind",
+        "prompt": "Will you reverse a decision you made this week, within the next two weeks?",
+        "options": [
+          "Yes",
+          "No"
+        ],
+        "outcome_prompt": "Did you reverse it?",
+        "know_in_days": 14
+      }
+    ],
+    "exclude": []
   }
 }

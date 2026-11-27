@@ -1,7 +1,8 @@
 /* Know the Score: matches a free-text job title to a questionnaire track.
    Same rules as skool/router/app/router.py: weighted keywords, domain words
    outweigh generic ones ("store manager" -> retail), typos caught by fuzzy
-   matching on single words, weak or no match -> "general". */
+   matching on single words, a track's "exclude" phrases veto it, weak or
+   no match -> "general". */
 (function (root) {
   const FALLBACK = "general";
   const MIN_SCORE = 2;
@@ -44,6 +45,7 @@
     const ranked = [];
     for (const [id, q] of Object.entries(questionnaires)) {
       if (id === FALLBACK) continue;
+      if ((q.exclude || []).some(x => ` ${title} `.includes(` ${x} `))) continue;
       const [s, matched] = score(title, q.keywords);
       if (s) ranked.push({ s, id, matched });
     }

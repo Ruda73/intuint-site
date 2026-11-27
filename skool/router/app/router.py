@@ -4,7 +4,9 @@ Scoring: each occupation has weighted keywords. Domain words ("supermarket",
 "shift boss") weigh more than generic role words ("manager", "owner"), so
 "store manager" routes to retail and "sales manager" routes to sales. A title
 with only one generic word ("manager") is too vague and goes to "general". Typos are caught with
-fuzzy matching on single words. Anything unmatched falls back to "general".
+fuzzy matching on single words. A track's "exclude" phrases veto it (e.g.
+"casino" rules out mining for "pit boss at a casino"). Anything unmatched
+falls back to "general".
 """
 import difflib
 import re
@@ -41,6 +43,8 @@ def route(job_title: str, questionnaires: dict) -> dict:
     ranked = []
     for occ_id, q in questionnaires.items():
         if occ_id == FALLBACK:
+            continue
+        if any(f" {x} " in f" {title} " for x in q.get("exclude", [])):
             continue
         score, matched = _score(title, q.get("keywords", {}))
         if score:

@@ -35,7 +35,7 @@ h1 { font-family: var(--font-display); font-weight: 600; font-size: 30px; margin
 h2 { font-family: var(--font-display); font-weight: 600; font-size: 22px; margin: 0; text-wrap: balance; }
 p { margin: 0; }
 .lede { max-width: 66ch; color: var(--muted); font-size: 15.5px; }
-.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 20px; display: grid; gap: 16px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 20px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
 .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 .pill { font-family: var(--font-mono); font-size: 12px; border-radius: 999px; padding: 2px 10px; border: 1px solid var(--line); color: var(--muted); }
 .small { font-size: 13px; color: var(--muted); }
@@ -52,8 +52,8 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
 .call:first-of-type { border-top: 0; padding-top: 0; }
 .call .n { font-family: var(--font-mono); color: var(--muted); font-size: 13px; }
 .call .q { font-size: 17px; font-weight: 500; }
-fieldset { border: 0; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-legend { font-size: 13px; color: var(--muted); margin-bottom: 6px; padding: 0; width: 100%; }
+fieldset { border: 0; margin: 0; padding: 0; min-width: 0; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+legend { font-size: 13px; color: var(--muted); margin-bottom: 6px; padding: 0; width: 100%; white-space: normal; }
 .choice { position: relative; }
 .choice input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
 .choice span { display: inline-block; padding: 8px 14px; border: 1px solid var(--line); border-radius: 999px; font-size: 15px; background: var(--paper); }
@@ -92,6 +92,8 @@ td.num, th.num { text-align: right; font-family: var(--font-mono); }
   </div>
   <p class="lede">Tell me what you do for a living and I'll give you the five calls that matter most in your kind of work. Seal your gut answer to each one first, before you think it through. Then check your numbers and give your analysis answer. When the outcomes are in, you'll see which was right more often: your gut or your analysis.</p>
 
+  <p class="err hidden" id="storageWarn" role="alert">This browser isn't keeping data (private browsing or blocked storage). You can still seal your calls: just keep the personal link you'll get afterwards, or your calls will be lost when you close this page.</p>
+
   <section id="stepJob" class="card" aria-labelledby="jobH">
     <h2 id="jobH">What do you do for a living?</h2>
     <div class="field">
@@ -103,21 +105,26 @@ td.num, th.num { text-align: right; font-family: var(--font-mono); }
       <input type="text" id="member" maxlength="120" autocomplete="name">
     </div>
     <div class="field">
-      <label class="lbl" for="email">Email for your monthly scorecard <span class="small">(optional)</span></label>
+      <label class="lbl" for="email">Email <span class="small">(optional: your personal link and monthly scorecard)</span></label>
       <input type="email" id="email" maxlength="200" autocomplete="email">
     </div>
+    <label class="row hidden" id="consentRow" style="gap:8px;align-items:flex-start;font-size:14px">
+      <input type="checkbox" id="consent" style="margin-top:4px">
+      <span>I agree that Intuint may store my name, email and answers to send me my link, my scorecard and Know the Score updates. I can ask for them to be deleted any time by emailing <a href="mailto:rudolph@intuint.co.za" style="color:var(--ink)">rudolph@intuint.co.za</a>.</span>
+    </label>
+    <p class="small">Your job title and answers are stored by Intuint to calculate scores and improve the questions. Name and email are only kept if you give them and tick the box.</p>
     <div class="row"><button class="btn-primary" id="goBtn" disabled>Get my five calls</button></div>
   </section>
 
   <section id="stepCalls" class="card hidden" aria-live="polite">
     <div class="row" style="justify-content:space-between;align-items:baseline">
       <h2 id="trackTitle"></h2>
-      <label class="small" for="trackSel">Not your kind of work?
-        <select id="trackSel" style="width:auto;padding:4px 8px;margin-left:6px"></select>
+      <label class="small" for="trackSel" style="max-width:100%">Not your kind of work?
+        <select id="trackSel" style="width:auto;max-width:100%;padding:4px 8px;margin-top:4px;display:block"></select>
       </label>
     </div>
     <p class="lede" id="trackIntro"></p>
-    <p class="small">Answer each one in about ten seconds. Don't open a spreadsheet and don't ask anyone. <b>50%</b> = a coin toss, <b>70%</b> = probably right, <b>90%</b> = I'd bet money on it.</p>
+    <p class="small">Answer each one in about ten seconds. Don't open a spreadsheet and don't ask anyone. For how sure you are: <b>50%</b> = unsure, could easily be wrong · <b>70%</b> = probably right · <b>90%</b> = I'd bet money on it.</p>
     <div id="calls"></div>
     <div class="row">
       <button class="btn-primary" id="sealBtn" disabled>Seal my answers</button>
@@ -129,19 +136,25 @@ td.num, th.num { text-align: right; font-family: var(--font-mono); }
   <section id="receipt" class="card hidden" aria-live="polite">
     <h2>Sealed.</h2>
     <p id="receiptText"></p>
+    <div id="linkBox" class="hidden" style="display:grid;gap:8px">
+      <p><b>Your personal link.</b> Open it on any device to see your calls, add your analysis and log outcomes. Keep it private.</p>
+      <div class="row"><input type="text" id="personalLink" readonly style="flex:1;min-width:220px;font-family:var(--font-mono);font-size:13px"><button class="btn-ghost" id="copyLink">Copy</button></div>
+      <p class="small" id="linkNote"></p>
+    </div>
     <p><b>Step 2: now check your numbers.</b> Open whatever you'd normally use (reports, the system, last time's figures) and give your analysis answer to each call below. Your gut answers stay locked, so you'll see later which one was right more often.</p>
-    <p class="small">Then post one of these calls in <b>Call of the week</b> in the Skool group. When an outcome is known, come back to this page on the same device and log it.</p>
+    <p class="small">Then post one of these calls in <b>Call of the week</b> in the Skool group.</p>
   </section>
 
   <section id="mine" class="card hidden" aria-labelledby="mineH">
     <h2 id="mineH">My sealed calls</h2>
+    <p class="small hidden" id="pendingNote"></p>
     <div class="tiles" id="tiles"></div>
     <div id="calib"></div>
     <div id="sealedList"></div>
-    <p class="small">Your calls are kept in this browser. Use the same device to log outcomes.</p>
+    <p class="small">Your calls are kept in this browser. On another device, use your personal link.</p>
   </section>
 
-  <p class="small">Part of <b>Know the Score</b>, the Intuint community for getting better at your job. Questions: <a href="mailto:rudolph@intuint.co.za?subject=Know%20the%20Score" style="color:var(--ink)">rudolph@intuint.co.za</a>.</p>
+  <p class="small">Part of <b>Know the Score</b>, the Intuint community for getting better at your job. Questions or deletion requests: <a href="mailto:rudolph@intuint.co.za?subject=Know%20the%20Score" style="color:var(--ink)">rudolph@intuint.co.za</a>.</p>
 </div>
 
 <script src="/start/route.js"></script>
@@ -153,8 +166,16 @@ const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 let Q = null, track = null, picks = {};
 
-function load() { try { return JSON.parse(localStorage.getItem(STORE)) || []; } catch { return []; } }
-function save(list) { try { localStorage.setItem(STORE, JSON.stringify(list)); } catch {} }
+// ---- storage: browser storage when allowed, memory otherwise ----
+let memory = [];
+const canStore = (() => { try { localStorage.setItem("kts.t", "1"); localStorage.removeItem("kts.t"); return true; } catch { return false; } })();
+function load() { if (!canStore) return memory; try { return JSON.parse(localStorage.getItem(STORE)) || []; } catch { return []; } }
+function save(list) { memory = list; if (canStore) try { localStorage.setItem(STORE, JSON.stringify(list)); } catch {} }
+if (!canStore) $("storageWarn").classList.remove("hidden");
+
+const linkFor = r => r.sent && r.token ? `${location.origin}/start/?ref=${r.id}.${r.token}` : null;
+const chance = a => 1 / a.options.length;
+const daysText = d => d == null ? "" : d <= 7 ? "you'll know within a week" : d <= 14 ? "you'll know within two weeks" : d <= 31 ? "you'll know within a month" : "you'll know within three months";
 
 async function post(body) {
   const json = JSON.stringify(body);
@@ -169,22 +190,26 @@ async function post(body) {
       const data = await r.json().catch(() => ({}));
       if (r.ok && data.ok) return data;
       last = data.code || `http_${r.status}`;
-      if (r.status >= 400 && r.status < 500) break;   // a real refusal; don't retry
+      if (r.status >= 400 && r.status < 500) break;
     } catch (e) { last = "network"; }
   }
   throw new Error(last || "failed");
 }
 
-$("job").addEventListener("input", () => { $("goBtn").disabled = !$("job").value.trim(); });
+// ---- step 1: job ----
+const needConsent = () => !!($("email").value.trim() || $("member").value.trim());
+function updateGo() {
+  $("consentRow").classList.toggle("hidden", !needConsent());
+  $("goBtn").disabled = !$("job").value.trim();
+}
+["job", "member", "email"].forEach(id => $(id).addEventListener("input", updateGo));
 $("job").addEventListener("keydown", e => { if (e.key === "Enter" && $("job").value.trim()) $("goBtn").click(); });
 
 $("goBtn").addEventListener("click", () => {
-  const r = KTSRoute.route($("job").value, Q);
-  showTrack(r.occupation);
+  showTrack(KTSRoute.route($("job").value, Q).occupation);
   $("stepCalls").classList.remove("hidden");
   $("stepCalls").scrollIntoView({ behavior: "smooth", block: "start" });
 });
-
 $("trackSel").addEventListener("change", e => showTrack(e.target.value));
 
 function showTrack(id) {
@@ -195,12 +220,12 @@ function showTrack(id) {
   $("trackIntro").textContent = q.intro;
   $("calls").innerHTML = q.questions.map((c, i) => `
     <div class="call" data-q="${esc(c.id)}">
-      <div class="n">Call ${i + 1} of ${q.questions.length}</div>
+      <div class="n">Call ${i + 1} of ${q.questions.length}${c.know_in_days ? " · " + daysText(c.know_in_days) : ""}</div>
       <div class="q" id="q-${esc(c.id)}">${esc(c.prompt)}</div>
       <fieldset aria-labelledby="q-${esc(c.id)}"><legend>My gut answer</legend>
         ${c.options.map(o => `<label class="choice"><input type="radio" name="a-${esc(c.id)}" value="${esc(o)}"><span>${esc(o)}</span></label>`).join("")}
       </fieldset>
-      <fieldset><legend>How sure am I?</legend>
+      <fieldset><legend>How sure am I? <span class="small">(a blind guess would be right ${Math.round(100 / c.options.length)}% of the time)</span></legend>
         ${CONF.map(v => `<label class="choice conf"><input type="radio" name="c-${esc(c.id)}" value="${v}"><span>${v}%</span></label>`).join("")}
       </fieldset>
     </div>`).join("");
@@ -217,45 +242,64 @@ $("calls").addEventListener("change", e => {
 });
 
 function updateSeal() {
+  const n = Q[track].questions.length;
   const done = Q[track].questions.filter(c => picks[c.id] && picks[c.id].gut_answer && picks[c.id].confidence).length;
-  $("sealBtn").disabled = done < Q[track].questions.length;
-  $("sealHint").textContent = done < Q[track].questions.length
-    ? `${done} of ${Q[track].questions.length} answered. Sealed answers can't be changed.`
-    : "All answered. Once you seal, they're locked.";
+  $("sealBtn").disabled = done < n;
+  $("sealHint").textContent = done < n ? `${done} of ${n} answered. Sealed answers can't be changed.` : "All answered. Once you seal, they're locked.";
+}
+
+function sealPayload(r) {
+  return { action: "seal", occupation: r.occupation, job_title: r.job_title, member: r.member || "", email: r.email || "",
+           consent: !!r.consent, answers: r.answers.map(a => ({ question_id: a.question_id, gut_answer: a.gut_answer, confidence: a.confidence })) };
 }
 
 $("sealBtn").addEventListener("click", async () => {
-  $("sealBtn").disabled = true; $("sealErr").classList.add("hidden");
+  $("sealErr").classList.add("hidden");
+  if (needConsent() && !$("consent").checked) {
+    $("sealErr").textContent = "Tick the box above to let me keep your name or email, or clear those fields.";
+    $("sealErr").classList.remove("hidden"); $("consentRow").scrollIntoView({ block: "center" }); return;
+  }
+  $("sealBtn").disabled = true;
   const q = Q[track];
-  const answers = q.questions.map(c => ({ question_id: c.id, ...picks[c.id] }));
-  const record = {
+  const r = {
     occupation: track, job_title: $("job").value.trim(), track_title: q.title,
-    answers: q.questions.map(c => ({ question_id: c.id, prompt: c.prompt, outcome_prompt: c.outcome_prompt,
-                                     options: c.options, ...picks[c.id], outcome: null })),
+    member: $("member").value.trim(), email: $("email").value.trim(), consent: $("consent").checked,
+    answers: q.questions.map(c => ({ question_id: c.id, prompt: c.prompt, outcome_prompt: c.outcome_prompt, options: c.options,
+                                     know_in_days: c.know_in_days, ...picks[c.id], analysis: null, outcome: null })),
   };
   try {
-    const res = await post({ action: "seal", occupation: track, job_title: record.job_title,
-                             member: $("member").value.trim(), email: $("email").value.trim(), answers });
-    Object.assign(record, { id: res.id, token: res.token, sealed_at: res.sealed_at, sent: true });
+    const res = await post(sealPayload(r));
+    Object.assign(r, { id: res.id, token: res.token, sealed_at: res.sealed_at, sent: true });
   } catch (e) {
-    if (e.message === "invalid_email") {
-      $("sealErr").textContent = "That email address doesn't look right. Fix it or leave it blank.";
-      $("sealErr").classList.remove("hidden"); $("sealBtn").disabled = false; return;
-    }
-    if (e.message === "rate_limited") {
-      $("sealErr").textContent = "Too many seals from this connection in the last hour. Try again later.";
-      $("sealErr").classList.remove("hidden"); $("sealBtn").disabled = false; return;
-    }
-    Object.assign(record, { id: "local-" + Date.now().toString(36), token: null, sealed_at: new Date().toISOString(), sent: false });
+    const msg = { invalid_email: "That email address doesn't look right. Fix it or leave it blank.",
+                  consent_required: "Tick the box above to let me keep your name or email, or clear those fields.",
+                  rate_limited: "Too many seals from this connection in the last hour. Try again later." }[e.message];
+    if (msg) { $("sealErr").textContent = msg; $("sealErr").classList.remove("hidden"); $("sealBtn").disabled = false; return; }
+    Object.assign(r, { id: "local-" + Date.now().toString(36), token: null, sealed_at: new Date().toISOString(), sent: false });
   }
-  const list = load(); list.unshift(record); save(list);
+  const list = load(); list.unshift(r); save(list);
   $("stepCalls").classList.add("hidden");
-  $("receiptText").innerHTML = record.sent
-    ? `Your five calls were sealed at <span class="mono">${esc(fmtDate(record.sealed_at))}</span>. Reference <span class="mono">${esc(record.id)}</span>.`
-    : `Your five calls are sealed in this browser at <span class="mono">${esc(fmtDate(record.sealed_at))}</span>, but they couldn't be sent to Intuint just now, so they won't appear on your monthly scorecard. Your own score below still works.`;
-  $("receipt").classList.remove("hidden");
+  showReceipt(r);
   renderMine();
   $("receipt").scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
+function showReceipt(r) {
+  $("receiptText").innerHTML = r.sent
+    ? `Your five calls were sealed at <span class="mono">${esc(fmtDate(r.sealed_at))}</span>. Reference <span class="mono">${esc(r.id)}</span>.`
+    : `Your five calls are sealed in this browser at <span class="mono">${esc(fmtDate(r.sealed_at))}</span>, but they couldn't be sent to Intuint just now. I'll try again automatically next time you open this page on this device.`;
+  const link = linkFor(r);
+  $("linkBox").classList.toggle("hidden", !link);
+  if (link) {
+    $("personalLink").value = link;
+    $("linkNote").textContent = r.email ? `I've also emailed it to ${r.email}.` : "Bookmark it or save it somewhere: it's the only way to reach these calls from another device.";
+  }
+  $("receipt").classList.remove("hidden");
+}
+
+$("copyLink").addEventListener("click", async () => {
+  try { await navigator.clipboard.writeText($("personalLink").value); $("copyLink").textContent = "Copied"; }
+  catch { $("personalLink").select(); }
 });
 
 function fmtDate(iso) {
@@ -263,10 +307,15 @@ function fmtDate(iso) {
   return isNaN(d) ? iso : d.toLocaleString("en-ZA", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
 }
 
+// ---- scorecard ----
 function renderMine() {
   const list = load();
   if (!list.length) { $("mine").classList.add("hidden"); return; }
   $("mine").classList.remove("hidden");
+  const unsent = list.filter(r => !r.sent).length;
+  $("pendingNote").classList.toggle("hidden", !unsent);
+  $("pendingNote").textContent = unsent ? `${unsent} set${unsent > 1 ? "s" : ""} of calls not yet sent to Intuint. I'll keep retrying each time you open this page.` : "";
+
   const all = list.flatMap(r => r.answers);
   const done = all.filter(a => a.outcome != null);
   const pct = (n, d) => d ? Math.round(100 * n / d) + "%" : "–";
@@ -276,30 +325,33 @@ function renderMine() {
   const split = withAn.filter(a => a.analysis.answer !== a.gut_answer);
   const gutWon = split.filter(a => a.outcome === a.gut_answer).length;
   const anWon = split.filter(a => a.outcome === a.analysis.answer).length;
+  const guess = done.length ? done.reduce((s, a) => s + chance(a), 0) / done.length : null;
   const brier = done.length ? done.reduce((s, a) => s + (a.confidence / 100 - (a.outcome === a.gut_answer ? 1 : 0)) ** 2, 0) / done.length : null;
   $("tiles").innerHTML = [
     [`${done.length}/${all.length}`, "outcomes logged"],
-    [pct(gutRight, done.length), "gut was right"],
+    [pct(gutRight, done.length), guess == null ? "gut was right" : `gut was right (blind guessing: ${Math.round(100 * guess)}%)`],
     [pct(anRight, withAn.length), "analysis was right"],
     [split.length ? `${gutWon}–${anWon}` : "–", "when they disagreed: gut wins – analysis wins"],
-    [brier == null ? "–" : brier.toFixed(2), "gut calibration (0 is perfect; 0.25 = always 50%)"],
+    [brier == null ? "–" : brier.toFixed(2), "gut calibration score (lower is better; 0 is perfect)"],
   ].map(([v, k]) => `<div class="tile"><div class="v">${v}</div><div class="k">${esc(k)}</div></div>`).join("");
 
   const rows = CONF.map(c => {
     const g = done.filter(a => a.confidence === c), an = withAn.filter(a => a.analysis.confidence === c);
     if (!g.length && !an.length) return "";
-    return `<tr><td>${c}% sure</td><td class="num">${g.length}</td><td class="num">${pct(g.filter(a => a.outcome === a.gut_answer).length, g.length)}</td>
+    const base = g.length ? Math.round(100 * g.reduce((s, a) => s + chance(a), 0) / g.length) + "%" : "–";
+    return `<tr><td>${c}% sure</td><td class="num">${g.length}</td><td class="num">${pct(g.filter(a => a.outcome === a.gut_answer).length, g.length)}</td><td class="num">${base}</td>
       <td class="num">${an.length}</td><td class="num">${pct(an.filter(a => a.outcome === a.analysis.answer).length, an.length)}</td></tr>`;
   }).join("");
   $("calib").innerHTML = rows
-    ? `<table><thead><tr><th>Confidence</th><th class="num">Gut calls</th><th class="num">Gut right</th><th class="num">Analysis calls</th><th class="num">Analysis right</th></tr></thead><tbody>${rows}</tbody></table>`
+    ? `<table><thead><tr><th>Confidence</th><th class="num">Gut calls</th><th class="num">Gut right</th><th class="num">Blind guess</th><th class="num">Analysis calls</th><th class="num">Analysis right</th></tr></thead><tbody>${rows}</tbody></table>
+       <p class="small">Well-calibrated means your "70% sure" calls come true about 70% of the time. "Blind guess" is what picking at random would score on the same calls.</p>`
     : `<p class="small">Your gut-vs-analysis table appears once you've logged outcomes.</p>`;
 
   $("sealedList").innerHTML = list.map((r, ri) => r.answers.map((a, ai) => {
     const key = `${ri}-${ai}`;
-    const verdict = (ans) => a.outcome === ans ? `<span class="right">right</span>` : `<span class="wrong">wrong</span>`;
+    const verdict = ans => a.outcome === ans ? `<span class="right">right</span>` : `<span class="wrong">wrong</span>`;
     let html = `<div class="sealed" data-r="${ri}" data-a="${ai}">
-      <div class="small">${esc(r.track_title)} · sealed ${esc(fmtDate(r.sealed_at))}</div>
+      <div class="small">${esc(r.track_title)} · sealed ${esc(fmtDate(r.sealed_at))}${a.outcome == null && a.know_in_days ? " · " + daysText(a.know_in_days) : ""}</div>
       <div>${esc(a.prompt)}</div>
       <div>1 · Gut: <span class="gut">${esc(a.gut_answer)}</span> <span class="small">(${a.confidence}%)</span>${a.outcome != null ? " · " + verdict(a.gut_answer) : ""}</div>`;
     if (a.analysis) {
@@ -345,10 +397,10 @@ $("sealedList").addEventListener("click", async e => {
     const answer = box.querySelector('input[name^="an-"]:checked').value;
     const confidence = Number(box.querySelector('input[name^="ac-"]:checked').value);
     body = { action: "analysis", answer, confidence };
-    apply = () => { a.analysis = { answer, confidence, at: new Date().toISOString() }; };
+    apply = () => { a.analysis = { answer, confidence, at: new Date().toISOString(), sent: !!r.sent }; };
   } else {
     body = { action: "outcome", outcome: b.dataset.o };
-    apply = () => { a.outcome = b.dataset.o; a.outcome_at = new Date().toISOString(); };
+    apply = () => { a.outcome = b.dataset.o; a.outcome_at = new Date().toISOString(); a.outcome_sent = !!r.sent; };
   }
   if (r.sent && r.token) {
     try { await post({ ...body, id: r.id, token: r.token, question_id: a.question_id }); }
@@ -363,12 +415,48 @@ $("sealedList").addEventListener("click", async e => {
   apply(); save(list); renderMine();
 });
 
-fetch("/start/questionnaires.json").then(r => r.json()).then(data => {
+// ---- retry seals that couldn't be sent, then their analysis and outcomes, in order ----
+async function syncPending() {
+  const list = load();
+  let changed = false;
+  for (const r of list.filter(x => !x.sent)) {
+    try {
+      const res = await post({ ...sealPayload(r), client_sealed_at: r.sealed_at });
+      Object.assign(r, { id: res.id, token: res.token, sent: true }); changed = true;
+      for (const a of r.answers) {
+        const ref = { id: r.id, token: r.token, question_id: a.question_id };
+        if (a.analysis) await post({ ...ref, action: "analysis", answer: a.analysis.answer, confidence: a.analysis.confidence }).catch(() => {});
+        if (a.outcome != null) await post({ ...ref, action: "outcome", outcome: a.outcome }).catch(() => {});
+      }
+    } catch (e) { break; }   // still offline; try again next visit
+  }
+  if (changed) { save(list); renderMine(); }
+}
+
+// ---- personal link: ?ref=<id>.<token> reloads calls from the server ----
+async function loadRef() {
+  const ref = new URLSearchParams(location.search).get("ref");
+  if (!ref || !/^[a-f0-9]{16}\.[a-f0-9]{32}$/.test(ref)) return;
+  const [id, token] = ref.split(".");
+  try {
+    const { record } = await post({ action: "load", id, token });
+    const list = load().filter(r => r.id !== id);
+    list.unshift(record); save(list); renderMine();
+    $("mine").scrollIntoView({ block: "start" });
+  } catch (e) {
+    $("stepJob").insertAdjacentHTML("beforebegin", `<p class="err" role="alert">That personal link didn't work. Check you copied all of it.</p>`);
+  }
+}
+
+fetch("/start/questionnaires.json").then(r => r.json()).then(async data => {
   Q = data;
   $("trackSel").innerHTML = Object.entries(Q).map(([id, q]) => `<option value="${esc(id)}">${esc(q.title)}</option>`).join("");
   const pre = new URLSearchParams(location.search).get("job");
-  if (pre) { $("job").value = pre; $("goBtn").disabled = false; }
+  if (pre) $("job").value = pre;
+  updateGo();
   renderMine();
+  await loadRef();
+  syncPending();
 }).catch(() => {
   $("stepJob").insertAdjacentHTML("beforeend", `<p class="err" role="alert">The questions couldn't load. Please refresh the page.</p>`);
 });

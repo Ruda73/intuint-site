@@ -25,6 +25,16 @@ def client(tmp_path):
     ("HR manager", "people_manager"),
     ("Manager", "general"),                        # too vague on its own
     ("Teacher", "general"),
+    ("Shop steward", "mining_operations"),
+    ("Plant manager at a bottling factory", "general"),
+    ("Pit boss at a casino", "general"),
+    ("Store keeper at a mine", "mining_operations"),
+    ("Buyer for Pick n Pay", "retail_store"),
+    ("Spaza shop owner", "retail_store"),
+    ("Winkel eienaar", "retail_store"),
+    ("Myn skofbaas", "mining_operations"),
+    ("Verkoopsverteenwoordiger", "sales"),
+    ("Spanleier", "people_manager"),
     ("", None),
 ])
 def test_routing(client, job, expected):
@@ -105,3 +115,12 @@ def test_gut_then_analysis_then_outcome(client):
     s = client.get("/members/m2/score", headers=KEY).json
     assert s["analysis_accuracy"] == 1.0
     assert s["disagreements"] == {"count": 1, "gut_won": 0, "analysis_won": 1}
+
+
+def test_most_calls_resolve_fast():
+    """Each track needs at least 3 calls that resolve within two weeks."""
+    import json
+    from pathlib import Path
+    q = json.loads((Path(__file__).resolve().parents[1] / "data" / "questionnaires.json").read_text())
+    for track, t in q.items():
+        assert sum(x["know_in_days"] <= 14 for x in t["questions"]) >= 3, track
