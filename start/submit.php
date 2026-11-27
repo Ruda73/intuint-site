@@ -6,13 +6,16 @@
  *   {"action":"seal", "job_title", "occupation", "member" (Skool name, optional),
  *    "email" (optional), "answers":[{"question_id","gut_answer","confidence"}]}
  *     -> {"ok":true, "id", "token", "sealed_at"}
+ *   {"action":"analysis", "id", "token", "question_id", "answer", "confidence"}
+ *     -> {"ok":true}            (after checking the numbers; before the outcome)
  *   {"action":"outcome", "id", "token", "question_id", "outcome"}
- *     -> {"ok":true, "gut_was_right"}
+ *     -> {"ok":true, "gut_was_right", "analysis_was_right" (null if no analysis)}
  *
+ * Order is enforced: gut (sealed) -> analysis (optional, once) -> outcome (once).
  * Storage: append-only JSON lines outside the public web folder
- * (~/intuint-data/start-sealed.jsonl and start-outcomes.jsonl). A sealed
- * call is never rewritten; each outcome can be recorded once. Only the
- * browser holding the token from the seal can add outcomes to it.
+ * (~/intuint-data/start-sealed.jsonl, start-analysis.jsonl, start-outcomes.jsonl).
+ * Nothing is rewritten. Only the browser holding the token from the seal can
+ * add an analysis or outcome to it.
  */
 
 const NOTIFY_TO  = 'rudolph@intuint.co.za';
@@ -70,8 +73,9 @@ $dir = getenv('INTUINT_DATA_DIR') ?: dirname($_SERVER['DOCUMENT_ROOT'] ?: __DIR_
 if (!is_dir($dir) && !@mkdir($dir, 0700, true)) {
     reply(500, ['ok' => false, 'code' => 'storage_unavailable']);
 }
-$sealedFile  = $dir . '/start-sealed.jsonl';
-$outcomeFile = $dir . '/start-outcomes.jsonl';
+$sealedFile   = $dir . '/start-sealed.jsonl';
+$analysisFile = $dir . '/start-analysis.jsonl';
+$outcomeFile  = $dir . '/start-outcomes.jsonl';
 
 function rate_limit(string $dir, string $bucket, int $max): void {
     $ipHash = hash('sha256', ($_SERVER['REMOTE_ADDR'] ?? '') . '|intuint|' . $bucket);
@@ -162,7 +166,7 @@ if ($action === 'seal') {
     reply(200, ['ok' => true, 'id' => $record['id'], 'token' => $token, 'sealed_at' => $record['sealed_at']]);
 }
 
-if ($action === 'outcome') {
+if ($action === 'analysis' || $action === 'outcome') {
     $id = (string) ($data['id'] ?? '');
     $token = (string) ($data['token'] ?? '');
     $qid = (string) ($data['question_id'] ?? '');
@@ -174,26 +178,47 @@ if ($action === 'outcome') {
     if (!$seal || !hash_equals($seal['token_hash'], hash('sha256', $token))) {
         reply(404, ['ok' => false, 'code' => 'not_found']);
     }
-    $answer = null;
-    foreach ($seal['answers'] as $a) if ($a['question_id'] === $qid) $answer = $a;
-    if (!$answer) {
-        reply(400, ['ok' => false, 'code' => 'unknown_question']);
-    }
+    $gut = null;
+    foreach ($seal['answers'] as $a) if ($a['question_id'] === $qid) $gut = $a;
     $q = null;
     foreach ($questionnaires[$seal['occupation']]['questions'] as $qq) if ($qq['id'] === $qid) $q = $qq;
+    if (!$gut || !$q) {
+        reply(400, ['ok' => false, 'code' => 'unknown_question']);
+    }
+    $same = fn($r) => ($r['id'] ?? '') === $id && ($r['question_id'] ?? '') === $qid;
+    $outcomeDone = find_lines($outcomeFile, $same);
+    $analysis = find_lines($analysisFile, $same)[0] ?? null;
+
+    if ($action === 'analysis') {
+        if ($outcomeDone) reply(409, ['ok' => false, 'code' => 'outcome_already_recorded']);
+        if ($analysis)    reply(409, ['ok' => false, 'code' => 'analysis_already_recorded']);
+        $ans = $data['answer'] ?? null;
+        if (!in_array($ans, $q['options'], true) || !in_array($data['confidence'] ?? null, CONFIDENCE, true)) {
+            reply(400, ['ok' => false, 'code' => 'invalid_answer']);
+        }
+        $rec = ['id' => $id, 'question_id' => $qid, 'analysis_answer' => $ans,
+                'confidence' => $data['confidence'], 'recorded_at' => gmdate('c')];
+        if (@file_put_contents($analysisFile, json_encode($rec, JSON_UNESCAPED_SLASHES) . "\n", FILE_APPEND | LOCK_EX) === false) {
+            reply(500, ['ok' => false, 'code' => 'write_failed']);
+        }
+        reply(200, ['ok' => true]);
+    }
+
     $outcome = $data['outcome'] ?? null;
-    if (!$q || !in_array($outcome, $q['options'], true)) {
+    if (!in_array($outcome, $q['options'], true)) {
         reply(400, ['ok' => false, 'code' => 'invalid_outcome']);
     }
-    if (find_lines($outcomeFile, fn($r) => ($r['id'] ?? '') === $id && ($r['question_id'] ?? '') === $qid)) {
+    if ($outcomeDone) {
         reply(409, ['ok' => false, 'code' => 'outcome_already_recorded']);
     }
     $rec = ['id' => $id, 'question_id' => $qid, 'outcome' => $outcome,
-            'gut_was_right' => $answer['gut_answer'] === $outcome, 'recorded_at' => gmdate('c')];
+            'gut_was_right' => $gut['gut_answer'] === $outcome,
+            'analysis_was_right' => $analysis ? $analysis['analysis_answer'] === $outcome : null,
+            'recorded_at' => gmdate('c')];
     if (@file_put_contents($outcomeFile, json_encode($rec, JSON_UNESCAPED_SLASHES) . "\n", FILE_APPEND | LOCK_EX) === false) {
         reply(500, ['ok' => false, 'code' => 'write_failed']);
     }
-    reply(200, ['ok' => true, 'gut_was_right' => $rec['gut_was_right']]);
+    reply(200, ['ok' => true, 'gut_was_right' => $rec['gut_was_right'], 'analysis_was_right' => $rec['analysis_was_right']]);
 }
 
 reply(400, ['ok' => false, 'code' => 'unknown_action']);

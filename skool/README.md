@@ -22,7 +22,8 @@ The router is a Python app, not part of the static site. Deploy it separately th
 `start/` in the site root is the page Lesson 1.2 links to: https://www.intuint.co.za/start/ (add `?job=...` to prefill the job). Members type their job, get their five calls, seal their gut answers, and later log outcomes and see their own score. It's plain HTML and PHP, like the survey, so it runs on the normal hosting with nothing to install.
 
 - Sealed calls are saved to `~/intuint-data/start-sealed.jsonl` (outside the public folder) and emailed to rudolph@intuint.co.za.
-- Outcomes go to `~/intuint-data/start-outcomes.jsonl`. Only the browser that sealed a call can log its outcome, and only once.
+- After sealing, members check their numbers and lock an analysis answer per call (`~/intuint-data/start-analysis.jsonl`). The order is fixed: gut → analysis → outcome.
+- Outcomes go to `~/intuint-data/start-outcomes.jsonl`. Only the browser that sealed a call can add its analysis or outcome, each only once. The score shows gut accuracy, analysis accuracy, and which one won when they disagreed.
 - The page routes jobs in the browser with `start/route.js`, which follows the same rules as the Python router.
 
 **Editing questions:** change `skool/router/data/questionnaires.json`, then copy it to `start/questionnaires.json`. A router test fails if the two copies differ.

@@ -71,6 +71,8 @@ td.num, th.num { text-align: right; font-family: var(--font-mono); }
 .sealed { display: grid; gap: 6px; padding: 12px 0; border-top: 1px solid var(--line); }
 .sealed:first-of-type { border-top: 0; }
 .gut { color: var(--gut); font-weight: 600; }
+.an { color: #5389CF; font-weight: 600; }
+.step2 { display: grid; gap: 8px; padding: 10px 12px; border: 1px dashed var(--line); border-radius: 8px; }
 .right { color: var(--good); font-weight: 600; }
 .wrong { color: var(--accent); font-weight: 600; }
 .hidden { display: none !important; }
@@ -88,7 +90,7 @@ td.num, th.num { text-align: right; font-family: var(--font-mono); }
     <h1>Your five calls</h1>
     <span class="pill">Know the Score · about 3 minutes</span>
   </div>
-  <p class="lede">Tell me what you do for a living and I'll give you the five calls that matter most in your kind of work. Seal your gut answer to each one now, before you think it through. Come back when you know how they turned out, and you'll see how often your gut is right.</p>
+  <p class="lede">Tell me what you do for a living and I'll give you the five calls that matter most in your kind of work. Seal your gut answer to each one first, before you think it through. Then check your numbers and give your analysis answer. When the outcomes are in, you'll see which was right more often: your gut or your analysis.</p>
 
   <section id="stepJob" class="card" aria-labelledby="jobH">
     <h2 id="jobH">What do you do for a living?</h2>
@@ -127,7 +129,8 @@ td.num, th.num { text-align: right; font-family: var(--font-mono); }
   <section id="receipt" class="card hidden" aria-live="polite">
     <h2>Sealed.</h2>
     <p id="receiptText"></p>
-    <p class="small">Next: post one of these calls in <b>Call of the week</b> in the Skool group. When an outcome is known, come back to this page on the same device and log it below.</p>
+    <p><b>Step 2: now check your numbers.</b> Open whatever you'd normally use (reports, the system, last time's figures) and give your analysis answer to each call below. Your gut answers stay locked, so you'll see later which one was right more often.</p>
+    <p class="small">Then post one of these calls in <b>Call of the week</b> in the Skool group. When an outcome is known, come back to this page on the same device and log it.</p>
   </section>
 
   <section id="mine" class="card hidden" aria-labelledby="mineH">
@@ -266,53 +269,98 @@ function renderMine() {
   $("mine").classList.remove("hidden");
   const all = list.flatMap(r => r.answers);
   const done = all.filter(a => a.outcome != null);
-  const right = done.filter(a => a.outcome === a.gut_answer).length;
+  const pct = (n, d) => d ? Math.round(100 * n / d) + "%" : "–";
+  const gutRight = done.filter(a => a.outcome === a.gut_answer).length;
+  const withAn = done.filter(a => a.analysis);
+  const anRight = withAn.filter(a => a.outcome === a.analysis.answer).length;
+  const split = withAn.filter(a => a.analysis.answer !== a.gut_answer);
+  const gutWon = split.filter(a => a.outcome === a.gut_answer).length;
+  const anWon = split.filter(a => a.outcome === a.analysis.answer).length;
   const brier = done.length ? done.reduce((s, a) => s + (a.confidence / 100 - (a.outcome === a.gut_answer ? 1 : 0)) ** 2, 0) / done.length : null;
   $("tiles").innerHTML = [
-    [all.length, "calls sealed"],
-    [done.length, "outcomes logged"],
-    [done.length ? Math.round(100 * right / done.length) + "%" : "–", "gut was right"],
-    [brier == null ? "–" : brier.toFixed(2), "calibration score (0 is perfect; 0.25 = always 50%)"],
+    [`${done.length}/${all.length}`, "outcomes logged"],
+    [pct(gutRight, done.length), "gut was right"],
+    [pct(anRight, withAn.length), "analysis was right"],
+    [split.length ? `${gutWon}–${anWon}` : "–", "when they disagreed: gut wins – analysis wins"],
+    [brier == null ? "–" : brier.toFixed(2), "gut calibration (0 is perfect; 0.25 = always 50%)"],
   ].map(([v, k]) => `<div class="tile"><div class="v">${v}</div><div class="k">${esc(k)}</div></div>`).join("");
 
   const rows = CONF.map(c => {
-    const at = done.filter(a => a.confidence === c);
-    const hit = at.filter(a => a.outcome === a.gut_answer).length;
-    return at.length ? `<tr><td>When I said ${c}%</td><td class="num">${at.length}</td><td class="num">${Math.round(100 * hit / at.length)}%</td></tr>` : "";
+    const g = done.filter(a => a.confidence === c), an = withAn.filter(a => a.analysis.confidence === c);
+    if (!g.length && !an.length) return "";
+    return `<tr><td>${c}% sure</td><td class="num">${g.length}</td><td class="num">${pct(g.filter(a => a.outcome === a.gut_answer).length, g.length)}</td>
+      <td class="num">${an.length}</td><td class="num">${pct(an.filter(a => a.outcome === a.analysis.answer).length, an.length)}</td></tr>`;
   }).join("");
   $("calib").innerHTML = rows
-    ? `<table><thead><tr><th>Confidence</th><th class="num">Calls</th><th class="num">Actually right</th></tr></thead><tbody>${rows}</tbody></table>`
-    : `<p class="small">Your calibration table appears once you've logged outcomes.</p>`;
+    ? `<table><thead><tr><th>Confidence</th><th class="num">Gut calls</th><th class="num">Gut right</th><th class="num">Analysis calls</th><th class="num">Analysis right</th></tr></thead><tbody>${rows}</tbody></table>`
+    : `<p class="small">Your gut-vs-analysis table appears once you've logged outcomes.</p>`;
 
-  $("sealedList").innerHTML = list.map((r, ri) => r.answers.map((a, ai) => `
-    <div class="sealed">
+  $("sealedList").innerHTML = list.map((r, ri) => r.answers.map((a, ai) => {
+    const key = `${ri}-${ai}`;
+    const verdict = (ans) => a.outcome === ans ? `<span class="right">right</span>` : `<span class="wrong">wrong</span>`;
+    let html = `<div class="sealed" data-r="${ri}" data-a="${ai}">
       <div class="small">${esc(r.track_title)} · sealed ${esc(fmtDate(r.sealed_at))}</div>
       <div>${esc(a.prompt)}</div>
-      <div>Gut: <span class="gut">${esc(a.gut_answer)}</span> <span class="small">(${a.confidence}%)</span>
-        ${a.outcome != null ? ` · Outcome: ${esc(a.outcome)} · <span class="${a.outcome === a.gut_answer ? "right" : "wrong"}">${a.outcome === a.gut_answer ? "gut was right" : "gut was wrong"}</span>` : ""}</div>
-      ${a.outcome == null ? `<fieldset data-r="${ri}" data-a="${ai}"><legend>${esc(a.outcome_prompt)} <span class="small">(log once you know; can't be changed)</span></legend>
-        ${a.options.map(o => `<button class="btn-ghost" data-o="${esc(o)}" style="padding:6px 12px">${esc(o)}</button>`).join("")}</fieldset>` : ""}
-    </div>`).join("")).join("");
+      <div>1 · Gut: <span class="gut">${esc(a.gut_answer)}</span> <span class="small">(${a.confidence}%)</span>${a.outcome != null ? " · " + verdict(a.gut_answer) : ""}</div>`;
+    if (a.analysis) {
+      html += `<div>2 · Analysis: <span class="an">${esc(a.analysis.answer)}</span> <span class="small">(${a.analysis.confidence}%)</span>${a.outcome != null ? " · " + verdict(a.analysis.answer) : ""}</div>`;
+    } else if (a.outcome == null) {
+      html += `<div class="step2"><div class="small"><b>2 · Now check your numbers.</b> What does the analysis say? (locked once saved)</div>
+        <fieldset><legend>Analysis answer</legend>${a.options.map(o => `<label class="choice"><input type="radio" name="an-${key}" value="${esc(o)}"><span>${esc(o)}</span></label>`).join("")}</fieldset>
+        <fieldset><legend>How sure?</legend>${CONF.map(v => `<label class="choice conf"><input type="radio" name="ac-${key}" value="${v}"><span>${v}%</span></label>`).join("")}</fieldset>
+        <div><button class="btn-ghost" data-act="analysis" disabled>Lock my analysis</button></div></div>`;
+    } else {
+      html += `<div class="small">2 · No analysis recorded.</div>`;
+    }
+    if (a.outcome != null) {
+      html += `<div>3 · Outcome: <b>${esc(a.outcome)}</b></div>`;
+    } else {
+      html += `<fieldset class="step3"><legend>3 · ${esc(a.outcome_prompt)} <span class="small">(log once you know; can't be changed${a.analysis ? "" : "; closes the analysis step"})</span></legend>
+        ${a.options.map(o => `<button class="btn-ghost" data-act="outcome" data-o="${esc(o)}" style="padding:6px 12px">${esc(o)}</button>`).join("")}</fieldset>`;
+    }
+    return html + `</div>`;
+  }).join("")).join("");
+}
+
+$("sealedList").addEventListener("change", e => {
+  const box = e.target.closest(".sealed"); if (!box) return;
+  const btn = box.querySelector('button[data-act="analysis"]');
+  if (btn) btn.disabled = !(box.querySelector('input[name^="an-"]:checked') && box.querySelector('input[name^="ac-"]:checked'));
+});
+
+function showErr(box, msg) {
+  box.querySelectorAll(".err").forEach(x => x.remove());
+  box.insertAdjacentHTML("beforeend", `<span class="err" role="alert">${esc(msg)}</span>`);
 }
 
 $("sealedList").addEventListener("click", async e => {
-  const b = e.target.closest("button[data-o]"); if (!b) return;
-  const fs = b.closest("fieldset");
-  const list = load(), r = list[+fs.dataset.r], a = r.answers[+fs.dataset.a];
+  const b = e.target.closest("button[data-act]"); if (!b) return;
+  const box = b.closest(".sealed");
+  const list = load(), r = list[+box.dataset.r], a = r.answers[+box.dataset.a];
   if (a.outcome != null) return;
-  fs.querySelectorAll("button").forEach(x => x.disabled = true);
+  const buttons = box.querySelectorAll("button");
+  buttons.forEach(x => x.disabled = true);
+  let body, apply;
+  if (b.dataset.act === "analysis") {
+    const answer = box.querySelector('input[name^="an-"]:checked').value;
+    const confidence = Number(box.querySelector('input[name^="ac-"]:checked').value);
+    body = { action: "analysis", answer, confidence };
+    apply = () => { a.analysis = { answer, confidence, at: new Date().toISOString() }; };
+  } else {
+    body = { action: "outcome", outcome: b.dataset.o };
+    apply = () => { a.outcome = b.dataset.o; a.outcome_at = new Date().toISOString(); };
+  }
   if (r.sent && r.token) {
-    try { await post({ action: "outcome", id: r.id, token: r.token, question_id: a.question_id, outcome: b.dataset.o }); }
+    try { await post({ ...body, id: r.id, token: r.token, question_id: a.question_id }); }
     catch (err) {
-      if (err.message !== "outcome_already_recorded") {
-        fs.querySelectorAll("button").forEach(x => x.disabled = false);
-        if (!fs.querySelector(".err")) fs.insertAdjacentHTML("beforeend", `<span class="err" role="alert">Couldn't save that just now. Please try again.</span>`);
+      if (!/already_recorded$/.test(err.message)) {
+        buttons.forEach(x => x.disabled = false);
+        showErr(box, "Couldn't save that just now. Please try again.");
         return;
       }
     }
   }
-  a.outcome = b.dataset.o; a.outcome_at = new Date().toISOString();
-  save(list); renderMine();
+  apply(); save(list); renderMine();
 });
 
 fetch("/start/questionnaires.json").then(r => r.json()).then(data => {
