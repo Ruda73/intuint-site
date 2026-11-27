@@ -23,7 +23,9 @@ The router is a Python app, not part of the static site. Deploy it separately th
 
 - Sealed calls are saved to `~/intuint-data/start-sealed.jsonl` (outside the public folder) and emailed to rudolph@intuint.co.za.
 - After sealing, members check their numbers and lock an analysis answer per call (`~/intuint-data/start-analysis.jsonl`). The order is fixed: gut → analysis → outcome.
+- Members get a personal link (`/start/?ref=...`, also emailed if they give an email) that reloads their calls on any device. Seals that fail to send are retried automatically next visit; `client_sealed_at` marks those (it's the browser's clock, so not proof of timing).
+- Name and email are only stored with the member's consent (recorded in the seal).
 - Outcomes go to `~/intuint-data/start-outcomes.jsonl`. Only the browser that sealed a call can add its analysis or outcome, each only once. The score shows gut accuracy, analysis accuracy, and which one won when they disagreed.
 - The page routes jobs in the browser with `start/route.js`, which follows the same rules as the Python router.
 
-**Editing questions:** change `skool/router/data/questionnaires.json`, then copy it to `start/questionnaires.json`. A router test fails if the two copies differ.
+**Editing questions:** Each call has `know_in_days`; keep at least three per track at 14 days or less (a test checks this) so a new member's first scorecard isn't empty. `exclude` phrases stop a track matching (e.g. "casino" for mining).  change `skool/router/data/questionnaires.json`, then copy it to `start/questionnaires.json`. A router test fails if the two copies differ.
